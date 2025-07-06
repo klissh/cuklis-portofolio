@@ -350,11 +350,21 @@ export default function AdminPage() {
           .filter((t: string) => t.length > 0)
       );
     }
-    await fetch("/api/profile", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...profileForm, photo_url: photoUrl, titles }),
-    });
+    try {
+      const res = await fetch("/api/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...profileForm, photo_url: photoUrl, titles }),
+      });
+      if (res.ok) {
+        setNotification({ show: true, message: "Profile berhasil diupdate!", type: "success" });
+      } else {
+        const data = await res.json();
+        setNotification({ show: true, message: data?.error || "Gagal update profile!", type: "error" });
+      }
+    } catch (err) {
+      setNotification({ show: true, message: "Gagal update profile!", type: "error" });
+    }
     setProfileImageFile(null);
     fetchProfile();
   };
