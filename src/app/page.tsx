@@ -116,36 +116,35 @@ export default function Home() {
         </div>
 
         {/* ... other main content elements ... */}
-        <div id="home" className="w-full flex flex-col justify-center items-center my-4 md:mt-15 text-center font-bold relative px-2 md:px-0 mx-auto overflow-x-hidden">
-          <div className="w-full">
+        <div id="home" className="w-full flex flex-col justify-center items-center my-10 md:mt-15 text-center font-bold relative px-4 md:px-0 mx-auto pt-10" style={{background: 'inherit'}}>
+          <div className="w-full flex justify-center items-center">
             <BlurText
-              text={profile?.name || "Muhammad Muhibuddin Mukhlish"}
-              delay={100}
+              text={profile?.name}
+              delay={150}
               animateBy="letters"
               direction="top"
               onAnimationComplete={handleAnimationComplete}
-              className="font-extrabold text-2xl xs:text-3xl sm:text-4xl md:text-6xl lg:text-7xl whitespace-nowrap inline-block text-center mx-auto w-full truncate"
+              className="text-[5vw] sm:text-2xl md:text-4xl lg:text-7xl text-center font-extrabold max-w-full"
             />
+          </div>
+          <div className="flex justify-center items-center w-full mt-6 px-2 md:px-0 overflow-x-hidden pb-2 pt-4">
+            {titles.length > 0 && (
+              <span className="bg-transparent text-cyan-100 px-4 py-2 rounded-full text-base xs:text-lg sm:text-xl font-bold shadow w-fit mx-auto block text-center break-words">
+                <TrueFocus
+                  sentence={titles.map((t: string) => t.replaceAll(' ', '\u00A0')).join(' ')}
+                  manualMode={true}
+                  blurAmount={5}
+                  borderColor="cyan"
+                  animationDuration={0.3}
+                  pauseBetweenAnimations={1}
+                />
+              </span>
+            )}
           </div>
         </div>
 
-        <div className="flex justify-center items-center w-full mt-4 px-2 md:px-0 overflow-x-hidden">
-          {titles.length > 0 && (
-            <span className="bg-transparent text-cyan-100 px-4 py-2 rounded-full text-base xs:text-lg sm:text-xl font-bold shadow w-fit mx-auto block text-center whitespace-nowrap truncate">
-              <TrueFocus
-                sentence={titles.map((t: string) => t.replaceAll(" ", "\u00A0")).join(" ")}
-                manualMode={true}
-                blurAmount={5}
-                borderColor="cyan"
-                animationDuration={0.3}
-                pauseBetweenAnimations={1}
-              />
-            </span>
-          )}
-        </div>
-
         {/* Marquee Section Start */}
-        <div className="w-full items-center mt-55 mb-9 relative h-[60px] hidden md:block space-y-2">
+        <div className="w-full items-center mt-40 mb-9 relative h-[60px] hidden md:block space-y-2">
           {/* Atas: kiri ke kanan */}
           <div className="overflow-x-hidden w-full">
             <div className="flex whitespace-nowrap animate-marquee text-cyan-200 font-bold text-2xl will-change-transform">
