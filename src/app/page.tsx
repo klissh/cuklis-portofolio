@@ -124,7 +124,7 @@ export default function Home() {
               animateBy="letters"
               direction="top"
               onAnimationComplete={handleAnimationComplete}
-              className="text-[5vw] sm:text-2xl md:text-4xl lg:text-7xl text-center font-extrabold max-w-full"
+              className="text-[6vw] sm:text-3xl md:text-5xl lg:text-7xl text-center font-extrabold max-w-full"
             />
           </div>
           <div className="flex justify-center items-center w-full mt-6 px-2 md:px-0 overflow-x-hidden pb-2 pt-4">
