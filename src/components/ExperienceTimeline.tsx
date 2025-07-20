@@ -10,7 +10,9 @@ interface Experience {
   id: number;
   title: string;
   company: string;
-  year: string;
+  date_start: string; // YYYY-MM
+  date_end?: string; // YYYY-MM or null
+  link?: string;
   description: string;
   logo: string;
   image?: string;
@@ -69,35 +71,81 @@ const ExperienceTimeline: React.FC = () => {
           // Changed grid to 2 columns, removed the 'auto' middle column
           <div key={exp.id} className="relative grid grid-cols-1 md:grid-cols-2 items-start gap-x-20 bg-black rounded-2xl p-6 shadow-lg md:bg-transparent">
             {/* Side 1: Title, Company, Year, Logo - Conditional Alignment */}
-            <div className={`flex flex-col ${index % 2 === 0 ? 'md:items-end md:text-right' : 'md:items-start md:text-left'} ${index % 2 === 0 ? 'md:order-1' : 'md:order-2'}`}>
-              <h3 className="md:text-2xl text-xl font-bold text-gray-100">{exp.title}</h3>
-
-              <p className="text-lg text-cyan-400 mb-1">{exp.company}</p>
-              {/* Year */}
-              <span
-                className="md:text-xl text-md font-regular text-gray-400 mb-2"
-                style={{ letterSpacing: '0.4em' }}
+            {exp.link ? (
+              <a
+                href={exp.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`flex flex-col ${index % 2 === 0 ? 'md:items-end md:text-right' : 'md:items-start md:text-left'} ${index % 2 === 0 ? 'md:order-1' : 'md:order-2'} group cursor-pointer`}
+                style={{ textDecoration: 'none', color: 'inherit' }}
               >
-                {exp.year}
-              </span>
-
-              {/* Logo */}
-              {exp.logo && exp.logo.trim() !== "" ? (
-                <div className="w-10 h-10 relative flex items-center justify-center md:my-0 my-5">
-                  <Image
-                    src={exp.logo}
-                    alt={`${exp.company} logo`}
-                    fill
-                    style={{ objectFit: 'contain' }}
-                    unoptimized
-                  />
-                </div>
-              ) : null}
-
-              {typeof exp.image === "string" && exp.image.trim() && !/\/\/experience-images\//.test(exp.image) ? (
-                <Image src={exp.image} alt="Experience" className="w-16 h-16 object-cover rounded" width={64} height={64} />
-              ) : null}
-            </div>
+                <h3 className="md:text-2xl text-xl font-bold text-gray-100 group-hover:text-cyan-200 transition">{exp.title}</h3>
+                {exp.company && (
+                  <span className="text-lg text-cyan-400 mb-1 block group-hover:text-cyan-300 transition">{exp.company}</span>
+                )}
+                {/* Date Range */}
+                <span
+                  className="md:text-xl text-md font-regular text-gray-400 mb-2"
+                  style={{ letterSpacing: '0.1em' }}
+                >
+                  {exp.date_start ?
+                    new Date(exp.date_start + '-01').toLocaleString('id-ID', { month: 'long', year: 'numeric' }) : ''
+                  }
+                  {exp.date_end ?
+                    ' - ' + new Date(exp.date_end + '-01').toLocaleString('id-ID', { month: 'long', year: 'numeric' }) :
+                    ' - Present'}
+                </span>
+                {/* Logo */}
+                {exp.logo && exp.logo.trim() !== "" ? (
+                  <div className="w-10 h-10 relative flex items-center justify-center md:my-0 my-5">
+                    <Image
+                      src={exp.logo}
+                      alt={`${exp.company} logo`}
+                      fill
+                      style={{ objectFit: 'contain' }}
+                      unoptimized
+                    />
+                  </div>
+                ) : null}
+                {typeof exp.image === "string" && exp.image.trim() && !/\/\/experience-images\//.test(exp.image) ? (
+                  <Image src={exp.image} alt="Experience" className="w-16 h-16 object-cover rounded" width={64} height={64} />
+                ) : null}
+              </a>
+            ) : (
+              <div className={`flex flex-col ${index % 2 === 0 ? 'md:items-end md:text-right' : 'md:items-start md:text-left'} ${index % 2 === 0 ? 'md:order-1' : 'md:order-2'}`}>
+                <h3 className="md:text-2xl text-xl font-bold text-gray-100">{exp.title}</h3>
+                {exp.company && (
+                  <span className="text-lg text-cyan-400 mb-1 block">{exp.company}</span>
+                )}
+                {/* Date Range */}
+                <span
+                  className="md:text-xl text-md font-regular text-gray-400 mb-2"
+                  style={{ letterSpacing: '0.1em' }}
+                >
+                  {exp.date_start ?
+                    new Date(exp.date_start + '-01').toLocaleString('id-ID', { month: 'long', year: 'numeric' }) : ''
+                  }
+                  {exp.date_end ?
+                    ' - ' + new Date(exp.date_end + '-01').toLocaleString('id-ID', { month: 'long', year: 'numeric' }) :
+                    ' - Present'}
+                </span>
+                {/* Logo */}
+                {exp.logo && exp.logo.trim() !== "" ? (
+                  <div className="w-10 h-10 relative flex items-center justify-center md:my-0 my-5">
+                    <Image
+                      src={exp.logo}
+                      alt={`${exp.company} logo`}
+                      fill
+                      style={{ objectFit: 'contain' }}
+                      unoptimized
+                    />
+                  </div>
+                ) : null}
+                {typeof exp.image === "string" && exp.image.trim() && !/\/\/experience-images\//.test(exp.image) ? (
+                  <Image src={exp.image} alt="Experience" className="w-16 h-16 object-cover rounded" width={64} height={64} />
+                ) : null}
+              </div>
+            )}
 
             {/* Side 2: Description - Conditional Alignment */}
             <div className={`text-gray-300 md:text-lg text:md ${index % 2 !== 0 ? 'md:text-right' : 'text-left'} ${index % 2 === 0 ? 'md:order-2' : 'md:order-1'}`}>

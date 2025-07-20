@@ -106,20 +106,19 @@ const ProjectCard: React.FC<ProjectCardProps> = React.memo(({ project, index }) 
         {/* Added flex-grow to help manage space within the flex container */}
         {/* Added initial opacity, hover effects, transition, and onClick handler */}
         <motion.div
-            className={`relative w-full flex-grow rounded-xl overflow-hidden z-10 ${imageOrderClass}`} // Added cursor-pointer
-            initial={{ opacity: 0.7 }} // Changed initial opacity to 70%
-            whileHover={{ opacity: 1, scale: 1.05 }} // Hover effects: opacity 100%, scale 10% (1.05 is 5%)
-            transition={{ duration: 0.3 }} // Smooth transition for hover effects
-            onClick={handleImageClick} // Handle click to redirect
+            className={`relative w-full aspect-square flex-grow rounded-xl overflow-hidden z-10 ${imageOrderClass} bg-neutral-900 p-4 flex items-center justify-center`}
+            initial={{ opacity: 0.7 }}
+            whileHover={{ opacity: 1, scale: 1.05 }}
+            transition={{ duration: 0.3 }}
+            onClick={handleImageClick}
         >
-            {/* Use the Image component here - Using explicit width/height */}
-            {/* Make sure these width/height are representative of the display size */}
-            {/* Also, ensure your source images are reasonably sized, not huge files */}
             <Image
               src={project.imageSrc}
               alt={`${project.title} image`}
-              width={500} // Using the explicit width
-              height={500} // Using the explicit height
+              fill
+              className="object-contain w-full h-full"
+              sizes="(max-width: 768px) 100vw, 33vw"
+              style={{ minHeight: 0, minWidth: 0 }}
             />
         </motion.div>
 

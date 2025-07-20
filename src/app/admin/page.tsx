@@ -23,7 +23,9 @@ interface Experience {
   title: string;
   company?: string;
   description: string;
-  year: string;
+  date_start: string; // YYYY-MM
+  date_end?: string; // YYYY-MM or null
+  link?: string;
   image: string;
   created_at: string;
   order: number;
@@ -295,7 +297,7 @@ export default function AdminPage() {
     fetchExperiences();
   };
   const handleExpEdit = (exp: Experience) => {
-    setExpForm({ title: exp.title, company: exp.company, description: exp.description, year: exp.year, image: exp.image });
+    setExpForm({ title: exp.title, company: exp.company, description: exp.description, date_start: exp.date_start, date_end: exp.date_end, link: exp.link, image: exp.image });
     setEditExpId(exp.id);
   };
   const handleExpDelete = async (id: number) => {
@@ -752,7 +754,9 @@ export default function AdminPage() {
                           <th className="p-3 px-6 text-left min-w-[180px]">Title</th>
                           <th className="p-3 px-6 text-left min-w-[140px]">Company</th>
                           <th className="p-3 px-6 text-left min-w-[220px]">Description</th>
-                          <th className="p-3 px-4 text-center w-24">Year</th>
+                          <th className="p-3 px-4 text-center w-24">Date Start</th>
+                          <th className="p-3 px-4 text-center w-24">Date End</th>
+                          <th className="p-3 px-4 text-center w-28">Link</th>
                           <th className="p-3 px-4 text-center w-28">Image</th>
                           <th className="p-3 px-4 text-center w-28">Action</th>
                         </tr>
@@ -769,7 +773,13 @@ export default function AdminPage() {
                             <td className="p-3 px-6 font-semibold text-blue-900 align-middle">{exp.title}</td>
                             <td className="p-3 px-6 text-blue-800 align-middle">{exp.company || '-'}</td>
                             <td className="p-3 px-6 text-gray-700 align-middle">{exp.description}</td>
-                            <td className="p-3 px-4 text-blue-800 font-semibold text-center align-middle">{exp.year}</td>
+                            <td className="p-3 px-4 text-blue-800 font-semibold text-center align-middle">{exp.date_start}</td>
+                            <td className="p-3 px-4 text-blue-800 font-semibold text-center align-middle">{exp.date_end || '-'}</td>
+                            <td className="p-3 px-4 text-center align-middle">
+                              {exp.link && (
+                                <a href={exp.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Link</a>
+                              )}
+                            </td>
                             <td className="p-3 px-4 text-center align-middle">
                               {exp.image && (
                                 <img
@@ -835,7 +845,7 @@ export default function AdminPage() {
                                     setShowExpForm(true);
                                     setExpFormMode("edit");
                                     setSelectedExp(exp);
-                                    setExpForm({ title: exp.title, company: exp.company, description: exp.description, year: exp.year, image: exp.image });
+                                    setExpForm({ title: exp.title, company: exp.company, description: exp.description, date_start: exp.date_start, date_end: exp.date_end, link: exp.link, image: exp.image });
                                     setEditExpId(exp.id);
                                     setExpImageFile(null);
                                   }}
@@ -909,12 +919,34 @@ export default function AdminPage() {
                         />
                       </div>
                       <div>
-                        <label className="text-blue-900 font-bold mb-1 block">Year</label>
+                        <label className="text-blue-900 font-bold mb-1 block">Date Start</label>
                         <input
-                          type="text"
-                          name="year"
-                          placeholder="Year"
-                          value={expForm.year || ""}
+                          type="month"
+                          name="date_start"
+                          placeholder="Date Start"
+                          value={expForm.date_start || ""}
+                          onChange={handleExpForm}
+                          className="bg-white border border-gray-400 text-gray-900 placeholder:text-gray-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 shadow-sm p-3 rounded-lg w-full"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-blue-900 font-bold mb-1 block">Date End (optional)</label>
+                        <input
+                          type="month"
+                          name="date_end"
+                          placeholder="Date End"
+                          value={expForm.date_end || ""}
+                          onChange={handleExpForm}
+                          className="bg-white border border-gray-400 text-gray-900 placeholder:text-gray-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 shadow-sm p-3 rounded-lg w-full"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-blue-900 font-bold mb-1 block">Link</label>
+                        <input
+                          type="url"
+                          name="link"
+                          placeholder="https://..."
+                          value={expForm.link || ""}
                           onChange={handleExpForm}
                           className="bg-white border border-gray-400 text-gray-900 placeholder:text-gray-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 shadow-sm p-3 rounded-lg w-full"
                         />

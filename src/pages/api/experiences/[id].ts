@@ -5,10 +5,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const { id } = req.query;
 
   if (req.method === 'PUT') {
-    const { title, description, year, company, logo, image, order } = req.body;
+    const { title, description, date_start, date_end, company, link, logo, image, order } = req.body;
     const { data, error } = await supabase
       .from('experiences')
-      .update({ title, description, year, company, logo, image, order })
+      .update({ title, description, date_start, date_end, company, link, logo, image, order })
       .eq('id', id);
     if (error) return res.status(500).json({ error: error.message });
     return res.status(200).json(data);

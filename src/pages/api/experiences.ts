@@ -13,10 +13,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   if (req.method === 'POST') {
-    const { title, description, year, company, image, order } = req.body;
+    const { title, description, date_start, date_end, company, link, image, order } = req.body;
     const { data, error } = await supabase
       .from('experiences')
-      .insert([{ title, description, year, company, image, order }]);
+      .insert([{ title, description, date_start, date_end, company, link, image, order }]);
     if (error) return res.status(500).json({ error: error.message });
     return res.status(201).json(data);
   }
