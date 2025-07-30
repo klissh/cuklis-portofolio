@@ -17,6 +17,7 @@ import TiltedCard from "@/blocks/Components/TiltedCard/TiltedCard";
 import ExperienceTimeline from '@/components/ExperienceTimeline';
 import SkillTag from '@/components/SkillTag'; // Assuming SkillTag is in components folder
 import ProjectCard from '@/components/ProjectCard'; // Import the new ProjectCard component
+import CertificateCard from '@/components/CertificateCard'; // Import the new CertificateCard component
 
 // Tambahkan type untuk Profile dan Section
 interface Profile {
@@ -38,6 +39,16 @@ interface Section {
 
 // Tambahkan kembali type Project
 interface Project {
+  id: number;
+  title: string;
+  description: string;
+  image: string;
+  link: string;
+  created_at: string;
+}
+
+// Tambahkan type Certificate
+interface Certificate {
   id: number;
   title: string;
   description: string;
@@ -88,6 +99,17 @@ export default function Home() {
       .then((res) => res.json())
       .then((data) => {
         setProjects(data);
+      });
+  }, []);
+
+  // State untuk certificates
+  const [certificates, setCertificates] = useState<Certificate[]>([]);
+
+  useEffect(() => {
+    fetch("/api/certificates")
+      .then((res) => res.json())
+      .then((data) => {
+        setCertificates(data);
       });
   }, []);
 
@@ -298,6 +320,37 @@ export default function Home() {
           )}
            </div>
         {/* Projects Section End */}
+
+        <div id="certificates" className="flex w-full items-center justify-center p-4 md:mt-25 mt-5 font-extrabold" style={{ scrollMarginTop: '120px' }}>
+          <BlurText
+            text=" My Certificate"
+            delay={150}
+            animateBy="letters"
+            direction="top"
+            onAnimationComplete={handleAnimationComplete}
+            className="md:text-7xl text-3xl font-extrabold"
+          />
+        </div>
+
+        {/* Certificates Section Start */}
+        <div className="grid grid-cols-1 md:grid-cols-3 w-full max-w-[1400px] mx-auto mt-10">
+          {loading ? (
+            <div className="col-span-3 text-center">Loading...</div>
+          ) : (
+            certificates.map((certificate, index) => (
+              <CertificateCard
+                key={certificate.id}
+                certificate={{
+                  ...certificate,
+                  imageSrc: certificate.image, // mapping ke prop CertificateCard
+                  number: (index + 1).toString().padStart(2, '0'), // jika butuh nomor urut
+                }}
+                index={index}
+              />
+            ))
+          )}
+           </div>
+        {/* Certificates Section End */}
       </main>
 
 

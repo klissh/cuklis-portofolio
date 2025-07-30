@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { FaProjectDiagram, FaUserTie, FaUserCircle, FaLayerGroup } from "react-icons/fa";
+import { FaProjectDiagram, FaUserTie, FaUserCircle, FaLayerGroup, FaCertificate } from "react-icons/fa";
 import { MdLogout, MdEdit, MdDelete } from "react-icons/md";
 import { useRouter } from "next/navigation";
 import { uploadImage, supabase } from "@/utils/supabaseClient";
@@ -48,9 +48,19 @@ interface Section {
   skills: string; // JSON string array
   created_at: string;
 }
+// Certificate
+interface Certificate {
+  id: number;
+  title: string;
+  description: string;
+  image: string;
+  link: string;
+  created_at: string;
+}
 
 const TABS = [
   { key: "projects", label: "Projects", icon: <FaProjectDiagram size={22} className="mr-3" /> },
+  { key: "certificates", label: "Certificates", icon: <FaCertificate size={22} className="mr-3" /> },
   { key: "experiences", label: "Experiences", icon: <FaUserTie size={22} className="mr-3" /> },
   { key: "profile", label: "Profile", icon: <FaUserCircle size={22} className="mr-3" /> },
   { key: "sections", label: "Sections", icon: <FaLayerGroup size={22} className="mr-3" /> },
@@ -89,12 +99,21 @@ export default function AdminPage() {
   const [editSectionId, setEditSectionId] = useState<number | null>(null);
   const [sectionLoading, setSectionLoading] = useState(false);
 
+  // Certificates state
+  const [certificates, setCertificates] = useState<Certificate[]>([]);
+  const [certificateForm, setCertificateForm] = useState<Partial<Certificate>>({});
+  const [editCertificateId, setEditCertificateId] = useState<number | null>(null);
+  const [certificateLoading, setCertificateLoading] = useState(false);
+
   // Tambah state untuk file gambar
   const [projectImageFile, setProjectImageFile] = useState<File | null>(null);
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
 
   // Tambah state untuk file gambar di experience
   const [expImageFile, setExpImageFile] = useState<File | null>(null);
+
+  // Tambah state untuk file gambar di certificate
+  const [certificateImageFile, setCertificateImageFile] = useState<File | null>(null);
 
   // Tambahkan state baru:
   const [showExpForm, setShowExpForm] = useState(false);
@@ -106,6 +125,11 @@ export default function AdminPage() {
   const [showProjectForm, setShowProjectForm] = useState(false);
   const [projectFormMode, setProjectFormMode] = useState<"add" | "edit">("add");
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+
+  // Tambahkan state untuk certificate form
+  const [showCertificateForm, setShowCertificateForm] = useState(false);
+  const [certificateFormMode, setCertificateFormMode] = useState<"add" | "edit">("add");
+  const [selectedCertificate, setSelectedCertificate] = useState<Certificate | null>(null);
 
   // Tambahkan di atas, setelah state Sections yang sudah ada
   const [showSectionForm, setShowSectionForm] = useState(false);
@@ -119,6 +143,10 @@ export default function AdminPage() {
   // Tambah state untuk modal konfirmasi hapus project
   const [showDeleteProjectModal, setShowDeleteProjectModal] = useState(false);
   const [projectIdToDelete, setProjectIdToDelete] = useState<number | null>(null);
+
+  // Tambah state untuk modal konfirmasi hapus certificate
+  const [showDeleteCertificateModal, setShowDeleteCertificateModal] = useState(false);
+  const [certificateIdToDelete, setCertificateIdToDelete] = useState<number | null>(null);
 
   const router = useRouter();
 
@@ -141,6 +169,7 @@ export default function AdminPage() {
   useEffect(() => {
     if (!loggedIn) return;
     if (tab === "projects") fetchProjects();
+    if (tab === "certificates") fetchCertificates();
     if (tab === "experiences") fetchExperiences();
     if (tab === "profile") fetchProfile();
     if (tab === "sections") fetchSections();
@@ -233,6 +262,67 @@ export default function AdminPage() {
   const cancelDeleteProject = () => {
     setShowDeleteProjectModal(false);
     setProjectIdToDelete(null);
+  };
+
+  // ------------------- CERTIFICATES CRUD -------------------
+  const fetchCertificates = async () => {
+    setCertificateLoading(true);
+    const res = await fetch("/api/certificates");
+    const data = await res.json();
+    setCertificates(data);
+    setCertificateLoading(false);
+  };
+  const handleCertificateForm = (e: any) => setCertificateForm({ ...certificateForm, [e.target.name]: e.target.value });
+  const handleCertificateFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setCertificateImageFile(e.target.files[0]);
+    }
+  };
+  const handleCertificateSubmit = async (e: any) => {
+    e.preventDefault();
+    let imageUrl = certificateForm.image || "";
+    if (certificateImageFile) {
+      imageUrl = await uploadImage(certificateImageFile, "certificate-images");
+    }
+    const payload = { ...certificateForm, image: imageUrl };
+    if (editCertificateId) {
+      await fetch(`/api/certificates/${editCertificateId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } else {
+      await fetch("/api/certificates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    }
+    setCertificateForm({});
+    setCertificateImageFile(null);
+    setEditCertificateId(null);
+    setShowCertificateForm(false);
+    fetchCertificates();
+  };
+  const handleCertificateEdit = (c: Certificate) => {
+    setCertificateForm({ title: c.title, description: c.description, image: c.image, link: c.link });
+    setEditCertificateId(c.id);
+  };
+  const handleCertificateDelete = async (id: number) => {
+    setShowDeleteCertificateModal(true);
+    setCertificateIdToDelete(id);
+  };
+  const confirmDeleteCertificate = async () => {
+    if (certificateIdToDelete == null) return;
+    await fetch(`/api/certificates/${certificateIdToDelete}`, { method: "DELETE" });
+    setNotification({ show: true, message: "Certificate berhasil dihapus!", type: "error" });
+    setShowDeleteCertificateModal(false);
+    setCertificateIdToDelete(null);
+    fetchCertificates();
+  };
+  const cancelDeleteCertificate = () => {
+    setShowDeleteCertificateModal(false);
+    setCertificateIdToDelete(null);
   };
 
   // ------------------- EXPERIENCES CRUD -------------------
@@ -723,6 +813,181 @@ export default function AdminPage() {
               </div>
             </section>
           )}
+          {/* Certificates Tab */}
+          {tab === "certificates" && (
+            <section>
+              <div className="bg-white rounded-2xl shadow-xl p-6 border border-blue-200">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-bold text-blue-800 text-lg">Daftar Certificate</h3>
+                  <button
+                    className="bg-green-600 hover:bg-green-700 text-white px-5 py-3 rounded-lg font-bold flex items-center gap-2"
+                    onClick={() => {
+                      setShowCertificateForm(true);
+                      setCertificateFormMode("add");
+                      setSelectedCertificate(null);
+                      setCertificateForm({});
+                      setCertificateImageFile(null);
+                    }}
+                  >
+                    + Tambah Certificate
+                  </button>
+                </div>
+                {certificateLoading ? (
+                  <div className="py-8 text-center text-blue-700 font-semibold">Loading...</div>
+                ) : certificates.length === 0 ? (
+                  <div className="py-8 text-center text-gray-400 font-semibold">Belum ada certificate.</div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-base border border-blue-200 rounded-lg overflow-hidden">
+                      <thead>
+                        <tr className="bg-blue-200 text-blue-900 font-bold">
+                          <th className="p-3 px-6 text-left min-w-[180px]">Title</th>
+                          <th className="p-3 px-6 text-left min-w-[220px]">Description</th>
+                          <th className="p-3 px-4 text-center w-32">Link</th>
+                          <th className="p-3 px-4 text-center w-28">Image</th>
+                          <th className="p-3 px-4 text-center w-36">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {certificates.map((c, i) => (
+                          <tr
+                            key={c.id}
+                            className={
+                              (i % 2 === 0 ? "bg-white" : "bg-blue-50") +
+                              " border-b border-blue-200 hover:bg-blue-100 transition"
+                            }
+                          >
+                            <td className="p-3 px-6 font-semibold text-blue-900 align-middle">{c.title}</td>
+                            <td className="p-3 px-6 text-gray-700 align-middle">{c.description}</td>
+                            <td className="p-3 px-4 text-center align-middle">
+                              <a href={c.link} className="text-cyan-700 underline" target="_blank" rel="noopener noreferrer">
+                                Visit
+                              </a>
+                            </td>
+                            <td className="p-3 px-4 text-center align-middle">
+                              {c.image && (
+                                <img
+                                  src={c.image}
+                                  alt="Certificate"
+                                  className="w-12 h-12 object-cover rounded border border-blue-200 mx-auto"
+                                />
+                              )}
+                            </td>
+                            <td className="p-3 px-4 text-center align-middle">
+                              <div className="flex items-center justify-center space-x-2">
+                                <button
+                                  className="flex items-center bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded-lg font-semibold text-sm gap-1"
+                                  onClick={() => {
+                                    setShowCertificateForm(true);
+                                    setCertificateFormMode("edit");
+                                    setSelectedCertificate(c);
+                                    setCertificateForm({ title: c.title, description: c.description, image: c.image, link: c.link });
+                                    setEditCertificateId(c.id);
+                                    setCertificateImageFile(null);
+                                  }}
+                                  title="Edit"
+                                >
+                                  <MdEdit size={18} />
+                                  <span>Edit</span>
+                                </button>
+                                <button
+                                  className="flex items-center bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg font-semibold text-sm gap-1"
+                                  onClick={() => handleCertificateDelete(c.id)}
+                                  title="Delete"
+                                >
+                                  <MdDelete size={18} />
+                                  <span>Hapus</span>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+                {/* Modal Form */}
+                {showCertificateForm && (
+                  <ModalForm
+                    title={certificateFormMode === "add" ? "Tambah Certificate" : "Edit Certificate"}
+                    onClose={() => {
+                      setShowCertificateForm(false);
+                      setEditCertificateId(null);
+                      setCertificateForm({});
+                      setCertificateImageFile(null);
+                    }}
+                  >
+                    <form
+                      onSubmit={handleCertificateSubmit}
+                      className="flex flex-col gap-5"
+                    >
+                      <div>
+                        <label className="text-blue-900 font-bold mb-1 block">Title</label>
+                        <input
+                          type="text"
+                          name="title"
+                          placeholder="Title"
+                          value={certificateForm.title || ""}
+                          onChange={handleCertificateForm}
+                          className="bg-white border border-gray-400 text-gray-900 placeholder:text-gray-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 shadow-sm p-3 rounded-lg w-full"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-blue-900 font-bold mb-1 block">Description</label>
+                        <textarea
+                          name="description"
+                          placeholder="Description"
+                          value={certificateForm.description || ""}
+                          onChange={handleCertificateForm}
+                          className="bg-white border border-gray-400 text-gray-900 placeholder:text-gray-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 shadow-sm p-3 rounded-lg w-full"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-blue-900 font-bold mb-1 block">Image</label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleCertificateFileChange}
+                          className="bg-white border border-gray-400 text-gray-900 placeholder:text-gray-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 shadow-sm p-3 rounded-lg w-full"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-blue-900 font-bold mb-1 block">Certificate Link</label>
+                        <input
+                          type="text"
+                          name="link"
+                          placeholder="Certificate Link"
+                          value={certificateForm.link || ""}
+                          onChange={handleCertificateForm}
+                          className="bg-white border border-gray-400 text-gray-900 placeholder:text-gray-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 shadow-sm p-3 rounded-lg w-full"
+                        />
+                      </div>
+                      <div className="flex gap-2 mt-2">
+                        <button
+                          type="submit"
+                          className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold text-lg shadow"
+                        >
+                          {certificateFormMode === "edit" ? "Update" : "Add"} Certificate
+                        </button>
+                        <button
+                          type="button"
+                          className="bg-gray-400 hover:bg-gray-500 text-white px-6 py-3 rounded-lg font-bold text-lg shadow"
+                          onClick={() => {
+                            setShowCertificateForm(false);
+                            setEditCertificateId(null);
+                            setCertificateForm({});
+                            setCertificateImageFile(null);
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  </ModalForm>
+                )}
+              </div>
+            </section>
+          )}
           {/* Experiences Tab */}
           {tab === "experiences" && (
             <section>
@@ -1175,7 +1440,19 @@ export default function AdminPage() {
             </div>
           </div>
         )}
+        {showDeleteCertificateModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+            <div className="bg-white rounded-xl shadow-lg p-8 max-w-sm w-full flex flex-col items-center">
+              <h3 className="text-xl font-bold mb-4 text-blue-900">Konfirmasi Hapus</h3>
+              <p className="mb-6 text-gray-700 text-center">Yakin ingin menghapus certificate ini?</p>
+              <div className="flex gap-4">
+                <button onClick={confirmDeleteCertificate} className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-bold">Ya, Hapus</button>
+                <button onClick={cancelDeleteCertificate} className="bg-gray-400 hover:bg-gray-500 text-white px-6 py-2 rounded-lg font-bold">Batal</button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
-} 
+}
