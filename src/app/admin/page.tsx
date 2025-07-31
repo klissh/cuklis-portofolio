@@ -35,7 +35,9 @@ interface Profile {
   id: number;
   name: string;
   photo_url: string;
+  cv_url?: string;
   bio: string;
+  description?: string; // Deskripsi tambahan
   titles?: string; // string JSON
   created_at: string;
 }
@@ -43,10 +45,17 @@ interface Profile {
 interface Section {
   id: number;
   type: string; // 'develop' | 'create'
-  title: string;
-  description: string;
   skills: string; // JSON string array
   created_at: string;
+}
+
+// Form interface untuk section yang menggabungkan data profile dan section
+interface SectionForm {
+  id?: number;
+  type?: string;
+  skills?: string;
+  name?: string; // Untuk nama profile
+  cv_url?: string; // Untuk CV profile
 }
 // Certificate
 interface Certificate {
@@ -56,6 +65,12 @@ interface Certificate {
   image: string;
   link: string;
   created_at: string;
+}
+
+// Skill interface
+interface Skill {
+  name: string;
+  logo: string;
 }
 
 const TABS = [
@@ -95,9 +110,15 @@ export default function AdminPage() {
 
   // Sections state
   const [sections, setSections] = useState<Section[]>([]);
-  const [sectionForm, setSectionForm] = useState<Partial<Section>>({ type: "develop" });
+  const [sectionForm, setSectionForm] = useState<Partial<SectionForm>>({ type: "develop" });
   const [editSectionId, setEditSectionId] = useState<number | null>(null);
   const [sectionLoading, setSectionLoading] = useState(false);
+
+  // Skills state
+  const [skillsList, setSkillsList] = useState<Skill[]>([]);
+  const [skillForm, setSkillForm] = useState<Skill>({ name: "", logo: "" });
+  const [editSkillId, setEditSkillId] = useState<number | null>(null);
+  const [showSkillForm, setShowSkillForm] = useState(false);
 
   // Certificates state
   const [certificates, setCertificates] = useState<Certificate[]>([]);
@@ -108,6 +129,7 @@ export default function AdminPage() {
   // Tambah state untuk file gambar
   const [projectImageFile, setProjectImageFile] = useState<File | null>(null);
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
+  const [profileCvFile, setProfileCvFile] = useState<File | null>(null);
 
   // Tambah state untuk file gambar di experience
   const [expImageFile, setExpImageFile] = useState<File | null>(null);
@@ -131,7 +153,7 @@ export default function AdminPage() {
   const [certificateFormMode, setCertificateFormMode] = useState<"add" | "edit">("add");
   const [selectedCertificate, setSelectedCertificate] = useState<Certificate | null>(null);
 
-  // Tambahkan di atas, setelah state Sections yang sudah ada
+  // Tambahkan state untuk section form
   const [showSectionForm, setShowSectionForm] = useState(false);
   const [sectionFormMode, setSectionFormMode] = useState<"edit">("edit");
   const [currentSectionType, setCurrentSectionType] = useState<"develop" | "create">("develop");
@@ -416,7 +438,9 @@ export default function AdminPage() {
     setProfileForm({
       name: data.name,
       photo_url: data.photo_url,
+      cv_url: data.cv_url,
       bio: data.bio,
+      description: data.description || "",
       titles: data.titles ? (Array.isArray(data.titles) ? data.titles.join(", ") : JSON.parse(data.titles).join(", ")) : "",
     });
     setProfileLoading(false);
@@ -427,12 +451,26 @@ export default function AdminPage() {
       setProfileImageFile(e.target.files[0]);
     }
   };
+  
+  const handleProfileCvChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setProfileCvFile(e.target.files[0]);
+    }
+  };
+  
   const handleProfileSubmit = async (e: any) => {
     e.preventDefault();
     let photoUrl = profileForm.photo_url || "";
+    let cvUrl = profileForm.cv_url || "";
+    
     if (profileImageFile) {
       photoUrl = await uploadImage(profileImageFile, "profile-images");
     }
+    
+    if (profileCvFile) {
+      cvUrl = await uploadImage(profileCvFile, "cv-files");
+    }
+    
     let titles = profileForm.titles;
     if (typeof titles === "string" && !titles.startsWith("[")) {
       titles = JSON.stringify(
@@ -446,7 +484,7 @@ export default function AdminPage() {
       const res = await fetch("/api/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...profileForm, photo_url: photoUrl, titles }),
+        body: JSON.stringify({ ...profileForm, photo_url: photoUrl, cv_url: cvUrl, titles }),
       });
       if (res.ok) {
         setNotification({ show: true, message: "Profile berhasil diupdate!", type: "success" });
@@ -458,6 +496,7 @@ export default function AdminPage() {
       setNotification({ show: true, message: "Gagal update profile!", type: "error" });
     }
     setProfileImageFile(null);
+    setProfileCvFile(null);
     fetchProfile();
   };
 
@@ -466,6 +505,7 @@ export default function AdminPage() {
     setSectionLoading(true);
     const res = await fetch("/api/sections");
     const data = await res.json();
+    console.log("Fetched sections data:", data);
     setSections(data);
     setSectionLoading(false);
   };
@@ -517,7 +557,6 @@ export default function AdminPage() {
   const handleSectionEdit = (s: Section) => {
     setSectionForm({
       type: s.type,
-      description: s.description,
       skills: Array.isArray(s.skills) ? s.skills.join(", ") : (JSON.parse(s.skills || "[]").join(", ")),
     });
     setEditSectionId(s.id);
@@ -531,17 +570,149 @@ export default function AdminPage() {
   // Filter agar hanya satu develop dan satu create
   const developSection = sections.find(s => s.type === "develop");
   const createSection = sections.find(s => s.type === "create");
+  
+  console.log("developSection:", developSection);
+  console.log("createSection:", createSection);
 
   const sectionRows = [
     {
       type: "develop",
-      data: developSection || { title: "", description: "", skills: "[]", id: undefined }
+      data: developSection || { title: "", skills: "[]", id: undefined }
     },
     {
       type: "create",
-      data: createSection || { title: "", description: "", skills: "[]", id: undefined }
+      data: createSection || { title: "", skills: "[]", id: undefined }
     }
   ];
+
+  // ------------------- SKILLS CRUD -------------------
+  // Load skills from createSection
+  useEffect(() => {
+    if (createSection?.skills) {
+      try {
+        const parsedSkills = JSON.parse(createSection.skills);
+        if (Array.isArray(parsedSkills)) {
+          // Convert old format (string array) to new format (object array)
+          const skillsArray = parsedSkills.map(skill => {
+            if (typeof skill === 'string') {
+              // Untuk skill lama yang hanya berupa string, biarkan logo kosong
+              // User harus mengisi URL logo secara manual
+              return { name: skill, logo: "" };
+            }
+            return skill;
+          });
+          setSkillsList(skillsArray);
+        }
+      } catch (e) {
+        setSkillsList([]);
+      }
+    } else {
+      setSkillsList([]);
+    }
+  }, [createSection]);
+
+  const handleSkillForm = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSkillForm({ ...skillForm, [e.target.name]: e.target.value });
+  };
+
+  const handleSkillSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      let updatedSkills = [...skillsList];
+      
+      if (editSkillId !== null) {
+        // Edit existing skill
+        updatedSkills[editSkillId] = skillForm;
+      } else {
+        // Add new skill
+        updatedSkills.push(skillForm);
+      }
+      
+      // Update createSection with new skills
+      const skillsJson = JSON.stringify(updatedSkills);
+      
+      if (createSection?.id) {
+        console.log('Updating existing section:', createSection.id);
+        const res = await fetch(`/api/sections/${createSection.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            type: createSection.type,
+            skills: skillsJson 
+          }),
+        });
+        
+        console.log('Response status:', res.status);
+        const responseData = await res.text();
+        console.log('Response data:', responseData);
+        
+        if (res.ok) {
+          setNotification({ show: true, message: "Skill berhasil disimpan!", type: "success" });
+          setShowSkillForm(false);
+          setEditSkillId(null);
+          setSkillForm({ name: "", logo: "" });
+          fetchSections(); // Refresh sections data
+        } else {
+          console.error('Failed to update section:', res.status, responseData);
+          setNotification({ show: true, message: `Gagal menyimpan skill! Status: ${res.status}`, type: "error" });
+        }
+      } else {
+        console.log('Creating new section');
+        const res = await fetch("/api/sections", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: "create",
+            skills: skillsJson
+          }),
+        });
+        
+        console.log('Response status:', res.status);
+        const responseData = await res.text();
+        console.log('Response data:', responseData);
+        
+        if (res.ok) {
+          setNotification({ show: true, message: "Skill berhasil disimpan!", type: "success" });
+          setShowSkillForm(false);
+          setEditSkillId(null);
+          setSkillForm({ name: "", logo: "" });
+          fetchSections(); // Refresh sections data
+        } else {
+          console.error('Failed to create section:', res.status, responseData);
+          setNotification({ show: true, message: `Gagal menyimpan skill! Status: ${res.status}`, type: "error" });
+        }
+      }
+    } catch (error) {
+      console.error('Error in handleSkillSubmit:', error);
+      setNotification({ show: true, message: "Terjadi error saat menyimpan skill!", type: "error" });
+    }
+  };
+
+  const handleSkillDelete = async (index: number) => {
+    if (!confirm("Yakin hapus skill ini?")) return;
+    
+    const updatedSkills = skillsList.filter((_, i) => i !== index);
+    const skillsJson = JSON.stringify(updatedSkills);
+    
+    if (createSection?.id) {
+      const res = await fetch(`/api/sections/${createSection.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          type: createSection.type,
+          skills: skillsJson 
+        }),
+      });
+      
+      if (res.ok) {
+        setNotification({ show: true, message: "Skill berhasil dihapus!", type: "success" });
+        fetchSections(); // Refresh sections data
+      } else {
+        setNotification({ show: true, message: "Gagal menghapus skill!", type: "error" });
+      }
+    }
+  };
 
   // ------------------- UI -------------------
   if (!loggedIn) {
@@ -1269,6 +1440,17 @@ export default function AdminPage() {
                     <textarea name="bio" placeholder="Bio" value={profileForm.bio || ""} onChange={handleProfileForm} className="bg-white border border-gray-400 text-gray-900 placeholder:text-gray-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 shadow-sm p-3 rounded-lg w-full" />
                   </div>
                   <div>
+                    <label className="text-blue-900 font-bold mb-1 block">Deskripsi Tambahan</label>
+                    <textarea 
+                      name="description" 
+                      placeholder="Deskripsi tambahan untuk bagian Hello, I'm..." 
+                      value={profileForm.description || ""} 
+                      onChange={handleProfileForm} 
+                      rows={4}
+                      className="bg-white border border-gray-400 text-gray-900 placeholder:text-gray-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 shadow-sm p-3 rounded-lg w-full" 
+                    />
+                  </div>
+                  <div>
                     <label className="text-blue-900 font-bold mb-1 block">Titles (boleh lebih dari satu, pisahkan dengan koma)</label>
                     <input
                       type="text"
@@ -1278,6 +1460,27 @@ export default function AdminPage() {
                       onChange={e => setProfileForm({ ...profileForm, titles: e.target.value })}
                       className="bg-white border border-gray-400 text-gray-900 placeholder:text-gray-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 shadow-sm p-3 rounded-lg w-full"
                     />
+                  </div>
+                  <div>
+                    <label className="text-blue-900 font-bold mb-1 block">CV File (PDF)</label>
+                    <input 
+                      type="file" 
+                      accept=".pdf" 
+                      onChange={handleProfileCvChange} 
+                      className="bg-white border border-gray-400 text-gray-900 placeholder:text-gray-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 shadow-sm p-3 rounded-lg w-full" 
+                    />
+                    {profile && profile.cv_url && (
+                      <div className="mt-2">
+                        <a 
+                          href={profile.cv_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 underline text-sm"
+                        >
+                          Lihat CV saat ini
+                        </a>
+                      </div>
+                    )}
                   </div>
                   <button type="submit" className="bg-blue-700 hover:bg-blue-800 text-white px-6 py-3 rounded-lg font-bold text-lg shadow mt-2">Update Profile</button>
                 </form>
@@ -1290,8 +1493,21 @@ export default function AdminPage() {
           {/* Sections Tab */}
           {tab === "sections" && (
             <section>
+              {/* Skill dan Tools Section */}
               <div className="bg-white rounded-2xl shadow-2xl p-8 mb-10 border border-blue-200">
-                <h3 className="font-bold mb-4 text-blue-800 text-lg">Daftar Section</h3>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-bold text-blue-800 text-lg">Skill dan Tools saya</h3>
+                  <button
+                    className="flex items-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm gap-1"
+                    onClick={() => {
+                      setShowSkillForm(true);
+                      setSkillForm({ name: "", logo: "" });
+                      setEditSkillId(null);
+                    }}
+                  >
+                    <span>+ Tambah Skill</span>
+                  </button>
+                </div>
                 {sectionLoading ? (
                   <div className="py-8 text-center text-blue-700 font-semibold">Loading...</div>
                 ) : (
@@ -1299,105 +1515,132 @@ export default function AdminPage() {
                     <table className="w-full text-base border border-blue-200 rounded-lg overflow-hidden">
                       <thead>
                         <tr className="bg-blue-200 text-blue-900 font-bold">
-                          <th className="p-3 px-6 text-left min-w-[120px]">Type</th>
-                          <th className="p-3 px-6 text-left min-w-[220px]">Description</th>
-                          <th className="p-3 px-6 text-left min-w-[180px]">Skills</th>
+                          <th className="p-3 px-6 text-left">Nama Skill</th>
+                          <th className="p-3 px-6 text-left">Logo URL</th>
                           <th className="p-3 px-4 text-center w-36">Action</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {sectionRows.map((row, i) => (
+                        {skillsList.map((skill, i) => (
                           <tr
-                            key={row.type}
+                            key={i}
                             className={
                               (i % 2 === 0 ? "bg-white" : "bg-blue-50") +
                               " border-b border-blue-200 hover:bg-blue-100 transition"
                             }
                           >
-                            <td className="p-3 px-6 font-semibold text-blue-900 align-middle capitalize">{row.type}</td>
-                            <td className="p-3 px-6 text-gray-700 align-middle">{row.data.description || <span className="text-gray-400 italic">Belum diisi</span>}</td>
+                            <td className="p-3 px-6 font-semibold text-blue-900 align-middle">
+                              {skill.name}
+                            </td>
                             <td className="p-3 px-6 text-gray-700 align-middle">
-                              {(row.data.skills && JSON.parse(row.data.skills).length > 0)
-                                ? JSON.parse(row.data.skills).join(', ')
-                                : <span className="text-gray-400 italic">Belum diisi</span>
-                              }
+                              <div className="flex items-center gap-2">
+                                <img src={skill.logo} alt={skill.name} className="w-6 h-6" onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                }} />
+                                <span className="text-sm text-gray-500 truncate max-w-xs">{skill.logo}</span>
+                              </div>
                             </td>
                             <td className="p-3 px-4 text-center align-middle">
                               <div className="flex items-center justify-center space-x-2">
                                 <button
                                   className="flex items-center bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded-lg font-semibold text-sm gap-1"
                                   onClick={() => {
-                                    setShowSectionForm(true);
-                                    setSectionForm({
-                                      type: row.type,
-                                      description: row.data.description || "",
-                                      skills: JSON.parse(row.data.skills || "[]").join(", "),
-                                      id: row.data.id,
-                                    });
-                                    setEditSectionId(row.data.id !== undefined ? row.data.id : null);
+                                    setShowSkillForm(true);
+                                    setSkillForm(skill);
+                                    setEditSkillId(i);
                                   }}
                                   title="Edit"
                                 >
                                   <MdEdit size={18} />
                                   <span>Edit</span>
                                 </button>
+                                <button
+                                  className="flex items-center bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg font-semibold text-sm gap-1"
+                                  onClick={() => handleSkillDelete(i)}
+                                  title="Delete"
+                                >
+                                  <MdDelete size={18} />
+                                  <span>Hapus</span>
+                                </button>
                               </div>
                             </td>
                           </tr>
                         ))}
+                        {skillsList.length === 0 && (
+                          <tr>
+                            <td colSpan={3} className="p-6 text-center text-gray-500 italic">
+                              Belum ada skill yang ditambahkan
+                            </td>
+                          </tr>
+                        )}
                       </tbody>
                     </table>
                   </div>
                 )}
               </div>
-              {showSectionForm && (
+
+              {/* Modal Form untuk Skill CRUD */}
+              {showSkillForm && (
                 <ModalForm
-                  title={`Edit Section ${sectionForm.type ? sectionForm.type.charAt(0).toUpperCase() + sectionForm.type.slice(1) : ""}`}
+                  title={editSkillId !== null ? "Edit Skill" : "Tambah Skill"}
                   onClose={() => {
-                    setShowSectionForm(false);
-                    setEditSectionId(null);
-                    setSectionForm({});
+                    setShowSkillForm(false);
+                    setEditSkillId(null);
+                    setSkillForm({ name: "", logo: "" });
                   }}
                 >
                   <form
-                    onSubmit={handleSectionSubmit}
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      handleSkillSubmit(e);
+                    }}
                     className="flex flex-col gap-5"
                   >
                     <div>
-                      <label className="text-blue-900 font-bold mb-1 block">Description</label>
-                      <textarea
-                        name="description"
-                        placeholder="Description"
-                        value={sectionForm.description || ""}
-                        onChange={handleSectionForm}
+                      <label className="text-blue-900 font-bold mb-1 block">Nama Skill</label>
+                      <input
+                        type="text"
+                        name="name"
+                        placeholder="Contoh: PHP, Python, Laravel, React..."
+                        value={skillForm.name || ""}
+                        onChange={handleSkillForm}
                         className="bg-white border border-gray-400 text-gray-900 placeholder:text-gray-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 shadow-sm p-3 rounded-lg w-full"
+                        required
                       />
                     </div>
                     <div>
-                      <label className="text-blue-900 font-bold mb-1 block">Skills (pisahkan dengan koma)</label>
+                      <label className="text-blue-900 font-bold mb-1 block">Logo URL</label>
                       <input
-                        type="text"
-                        name="skills"
-                        placeholder="Skill1, Skill2, ..."
-                        value={sectionForm.skills || ""}
-                        onChange={handleSectionSkills}
+                        type="url"
+                        name="logo"
+                        placeholder="https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/PHP-logo.svg/1067px-PHP-logo.svg.png"
+                        value={skillForm.logo || ""}
+                        onChange={handleSkillForm}
                         className="bg-white border border-gray-400 text-gray-900 placeholder:text-gray-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 shadow-sm p-3 rounded-lg w-full"
+                        required
                       />
+                      <p className="text-gray-600 text-sm mt-1">
+                        Gunakan URL lengkap dari internet (contoh: dari Wikimedia, Google Images, dll). Jangan gunakan path lokal.
+                      </p>
                     </div>
                     <div className="flex gap-2 mt-2">
                       <button
-                        type="submit"
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleSkillSubmit(e);
+                        }}
                         className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold text-lg shadow"
                       >
-                        Simpan
+                        {editSkillId !== null ? "Update" : "Tambah"}
                       </button>
                       <button
                         type="button"
                         className="bg-gray-400 hover:bg-gray-500 text-white px-6 py-3 rounded-lg font-bold text-lg shadow"
                         onClick={() => {
-                          setShowSectionForm(false);
-                          setEditSectionId(null);
-                          setSectionForm({});
+                          setShowSkillForm(false);
+                          setEditSkillId(null);
+                          setSkillForm({ name: "", logo: "" });
                         }}
                       >
                         Cancel

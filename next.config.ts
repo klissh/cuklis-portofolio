@@ -4,6 +4,17 @@ const nextConfig: NextConfig = {
   images: {
     domains: [
       'vfrcihtxindrhqcuolgl.supabase.co',
+      'upload.wikimedia.org',
+      'cdn.jsdelivr.net',
+      'raw.githubusercontent.com',
+      'logos-world.net',
+      'seeklogo.com',
+    ],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
     ],
   },
   eslint: {

@@ -25,15 +25,22 @@ interface Profile {
   name: string;
   photo_url: string;
   bio: string;
+  description?: string; // Deskripsi tambahan
   created_at: string;
   titles: string;
+  cv_url?: string; // CV URL disimpan di profile
 }
+
+interface Skill {
+  name: string;
+  logo: string; // URL logo
+}
+
 interface Section {
   id: number;
   type: string; // 'develop' | 'create'
   title: string;
-  description: string;
-  skills: string; // JSON string array
+  skills: string; // JSON string array of Skill objects
   created_at: string;
 }
 
@@ -90,6 +97,21 @@ export default function Home() {
   const createSection = sections.find(s => s.type === 'create');
   const devSkills = developSection ? JSON.parse(developSection.skills || '[]') : [];
   const contentSkills = createSection ? JSON.parse(createSection.skills || '[]') : [];
+  
+  // Parse skills dari createSection dengan format baru (object dengan name dan logo)
+  const skillsFromCreate = createSection ? (() => {
+    try {
+      const parsed = JSON.parse(createSection.skills || '[]');
+      return Array.isArray(parsed) ? parsed.map(skill => {
+        if (typeof skill === 'string') {
+          return { name: skill, logo: `/techstack/${skill.toLowerCase()}.svg` };
+        }
+        return skill;
+      }) : [];
+    } catch (e) {
+      return [];
+    }
+  })() : [];
 
   // State untuk projects
   const [projects, setProjects] = useState<Project[]>([]);
@@ -198,39 +220,84 @@ export default function Home() {
           </div>
           {/* Tech Stack Section Start */}
           <div className="flex flex-col w-full max-w-lg px-4 md:px-0 mt-10 mb-20 space-y-8">
-            {/* DEVELOP Card */}
+            {/* Hello, I'm Card */}
             <div className="relative p-6 rounded-lg transition-transform duration-300 ease-in-out hover:scale-105 custom-corner-border inline-block max-w-max">
               <h3 className="text-white font-bold md:text-2xl text-lg tracking-wide mb-3">
-                DEVELOP
+                Hello, I'm
               </h3>
-              <p className="text-gray-400 md:text-md text-sm mt-2 leading-relaxed mb-5">
-                {developSection?.description || "Started creating mobile applications using Flutter, FlutterFlow, and Firebase and eventually switched to Web Development using NextJS, React, and Tailwind"}
-              </p>
-              <h4 className="text-cyan-300 font-semibold mb-3 text-base">
-                Skillset &amp; tools
+              <h4 className="text-cyan-300 font-semibold mb-3 text-lg">
+                {profile?.name || "Nama belum diisi"}
               </h4>
-              <div className="flex flex-wrap gap-2">
-                {devSkills.map((skill: string) => (
-                  <SkillTag key={skill} skillName={skill} />
-                ))}
-              </div>
+              {/* Deskripsi tambahan dari profile */}
+              {profile?.description && (
+                <p className="text-gray-400 md:text-md text-sm mt-2 leading-relaxed mb-5 text-justify">
+                  {profile.description}
+                </p>
+              )}
+              {/* Download CV Button */}
+              {profile?.cv_url && (
+                <div className="flex justify-center mt-4">
+                  <a
+                    href={profile.cv_url}
+                    download
+                    className="relative bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-8 py-3 rounded-lg font-bold text-sm uppercase tracking-wider transition-all duration-300 hover:from-blue-400 hover:to-cyan-400 hover:scale-105 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(6,182,212,0.4)] shadow-[0_0_10px_rgba(59,130,246,0.3)] border border-blue-400/30 backdrop-blur-sm"
+                    style={{
+                      textShadow: '0 0 10px rgba(59,130,246,0.8)',
+                      boxShadow: '0 0 15px rgba(59,130,246,0.4), inset 0 1px 0 rgba(255,255,255,0.2)'
+                    }}
+                  >
+                    <span className="relative z-10">Download CV</span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-cyan-600/20 rounded-lg blur-sm"></div>
+                  </a>
+                </div>
+              )}
             </div>
 
-            {/* CREATE Card */}
-            <div className="relative p-6 rounded-lg transition-transform duration-300 ease-in-out hover:scale-105 custom-corner-border inline-block max-w-max">
-              <h3 className="text-white font-bold md:text-2xl text:lg tracking-wide mb-3">
-                CREATE
+            {/* Skill dan Tools saya Card */}
+            <div className="relative p-4 md:p-6 rounded-lg transition-transform duration-300 ease-in-out hover:scale-105 custom-corner-border w-full lg:flex-1 lg:max-w-2xl">
+              <h3 className="text-white font-bold text-xl md:text-2xl tracking-wide mb-4">
+                Skill dan Tools saya
               </h3>
-              <p className="text-gray-400 md:text-md text-sm mt-2 leading-relaxed mb-5">
-                {createSection?.description || "My content creation journey evolved from a side hustle to serving other creators, achieving an average reach of 15 million within 90 days."}
-              </p>
-              <h4 className="text-cyan-300 font-semibold mb-3 text-base">
-                Skillset &amp; Tools
-              </h4>
-              <div className="flex flex-wrap gap-2">
-                {contentSkills.map((skill: string) => (
-                  <SkillTag key={skill} skillName={skill} />
+              {/* Grid untuk skills dengan logo - responsif untuk mobile, desktop tetap 4 kolom */}
+              <div className="grid grid-cols-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 md:gap-4 lg:gap-6">
+                {/* Menampilkan skills dari createSection */}
+                {skillsFromCreate.map((skill: any, index: number) => (
+                  <div key={index} className="bg-transparent border-2 border-white rounded-lg px-4 py-5 flex flex-col items-center justify-center text-center h-[110px] w-[110px] sm:h-[100px] sm:w-[100px] md:h-[95px] md:w-[95px] lg:h-[90px] lg:w-[90px] xl:h-[85px] xl:w-[85px] hover:bg-white/10 transition-all duration-300 hover:scale-105 shadow-lg mx-auto" style={{boxShadow: 'inset 0 0 0 4px transparent, 0 0 0 4px rgba(0,0,0,0.8)'}}>
+                    {skill.logo && (
+                      <div className="w-8 h-8 sm:w-7 sm:h-7 md:w-6 md:h-6 lg:w-6 lg:h-6 xl:w-5 xl:h-5 mb-3 sm:mb-2 flex items-center justify-center flex-shrink-0">
+                        <img 
+                          src={skill.logo} 
+                          alt={skill.name} 
+                          className="w-full h-full object-contain"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    )}
+                    <span className="text-sm sm:text-xs md:text-xs lg:text-xs xl:text-xs text-gray-300 font-medium line-clamp-2 leading-tight text-center px-1">{skill.name}</span>
+                  </div>
                 ))}
+                {/* Jika tidak ada skills, tampilkan placeholder */}
+                {skillsFromCreate.length === 0 && (
+                  <>
+                    {Array.from({ length: 8 }, (_, i) => (
+                      <div key={i} className="bg-transparent border-2 border-white rounded-lg px-4 py-5 flex flex-col items-center justify-center text-center h-[110px] w-[110px] sm:h-[100px] sm:w-[100px] md:h-[95px] md:w-[95px] lg:h-[90px] lg:w-[90px] xl:h-[85px] xl:w-[85px] hover:bg-white/10 transition-all duration-300 hover:scale-105 shadow-lg mx-auto" style={{boxShadow: 'inset 0 0 0 4px transparent, 0 0 0 4px rgba(0,0,0,0.8)'}}>
+                        <div className="w-8 h-8 sm:w-7 sm:h-7 md:w-6 md:h-6 lg:w-6 lg:h-6 xl:w-5 xl:h-5 mb-3 sm:mb-2 flex items-center justify-center flex-shrink-0">
+                          <img 
+                            src={`/techstack/php.svg`} 
+                            alt="placeholder" 
+                            className="w-full h-full object-contain"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                        </div>
+                        <span className="text-sm sm:text-xs md:text-xs lg:text-xs xl:text-xs text-gray-300 font-medium line-clamp-2 leading-tight text-center px-1">PHP</span>
+                      </div>
+                    ))}
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -301,7 +368,7 @@ export default function Home() {
         </div>
 
         {/* Projects Section Start */}
-        <div className="grid grid-cols-1 md:grid-cols-3 w-full max-w-[1400px] mx-auto mt-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 w-full max-w-[1400px] mx-auto mt-4 md:mt-10">
           {loading ? (
             <div className="col-span-3 text-center">Loading...</div>
           ) : (
@@ -321,7 +388,7 @@ export default function Home() {
            </div>
         {/* Projects Section End */}
 
-        <div id="certificates" className="flex w-full items-center justify-center p-4 md:mt-25 mt-5 font-extrabold" style={{ scrollMarginTop: '120px' }}>
+        <div id="certificates" className="flex w-full items-center justify-center p-4 mt-16 md:mt-25 font-extrabold" style={{ scrollMarginTop: '120px' }}>
           <BlurText
             text=" My Certificate"
             delay={150}
@@ -333,7 +400,7 @@ export default function Home() {
         </div>
 
         {/* Certificates Section Start */}
-        <div className="grid grid-cols-1 md:grid-cols-3 w-full max-w-[1400px] mx-auto mt-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 w-full max-w-[1400px] mx-auto mt-4 md:mt-10">
           {loading ? (
             <div className="col-span-3 text-center">Loading...</div>
           ) : (
