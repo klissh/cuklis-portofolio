@@ -1,6 +1,7 @@
 // src/pages/api/projects/[id].ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { supabase } from '@/utils/supabaseClient';
+import { cleanupUnusedFiles } from '@/utils/storageCleanup';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query;
@@ -18,6 +19,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method === 'DELETE') {
     const { error } = await supabase.from('projects').delete().eq('id', id);
     if (error) return res.status(500).json({ error: error.message });
+    
+    // Jalankan cleanup otomatis setelah delete
+    try {
+      await cleanupUnusedFiles();
+      console.log('Storage cleanup completed after project deletion');
+    } catch (cleanupError) {
+      console.error('Error during storage cleanup:', cleanupError);
+      // Tidak mengembalikan error karena delete sudah berhasil
+    }
+    
     return res.status(204).end();
   }
 

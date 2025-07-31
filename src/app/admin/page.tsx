@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { FaProjectDiagram, FaUserTie, FaUserCircle, FaLayerGroup, FaCertificate } from "react-icons/fa";
+import { FaProjectDiagram, FaUserTie, FaUserCircle, FaLayerGroup, FaCertificate, FaDatabase } from "react-icons/fa";
 import { MdLogout, MdEdit, MdDelete } from "react-icons/md";
 import { useRouter } from "next/navigation";
 import { uploadImage, supabase } from "@/utils/supabaseClient";
@@ -78,6 +78,7 @@ const TABS = [
   { key: "experiences", label: "Experiences", icon: <FaUserTie size={22} className="mr-3" /> },
   { key: "profile", label: "Profile", icon: <FaUserCircle size={22} className="mr-3" /> },
   { key: "sections", label: "Sections", icon: <FaLayerGroup size={22} className="mr-3" /> },
+  { key: "storage", label: "Storage", icon: <FaDatabase size={22} className="mr-3" /> },
 ];
 
 export default function AdminPage() {
@@ -169,6 +170,10 @@ export default function AdminPage() {
   const [showDeleteCertificateModal, setShowDeleteCertificateModal] = useState(false);
   const [certificateIdToDelete, setCertificateIdToDelete] = useState<number | null>(null);
 
+  // Storage cleanup state
+  const [cleanupLoading, setCleanupLoading] = useState(false);
+  const [cleanupResult, setCleanupResult] = useState<{ deletedCount: number; message: string } | null>(null);
+
   const router = useRouter();
 
   // Proteksi halaman admin: cek session
@@ -223,6 +228,52 @@ export default function AdminPage() {
     await fetch('/api/admin-logout', { method: 'POST' });
     setLoggedIn(false);
     router.push("/");
+  };
+
+  // ------------------- STORAGE CLEANUP -------------------
+  const handleStorageCleanup = async (mode: 'unused' | 'old' = 'unused') => {
+    try {
+      setCleanupLoading(true);
+      setCleanupResult(null);
+      
+      const res = await fetch('/api/admin/storage-cleanup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode, daysOld: 30 })
+      });
+      
+      const data = await res.json();
+      
+      if (res.ok) {
+        const deletedCount = data.deletedCount || 0;
+        let message = '';
+        
+        if (deletedCount > 0) {
+          message = `Berhasil menghapus ${deletedCount} file yang tidak digunakan!`;
+          setNotification({ show: true, message, type: 'success' });
+        } else {
+          message = 'Tidak ada file yang perlu dihapus. Storage sudah bersih!';
+          setNotification({ show: true, message, type: 'success' });
+        }
+        
+        setCleanupResult({ deletedCount, message });
+      } else {
+        setNotification({ 
+          show: true, 
+          message: data.error || 'Gagal membersihkan storage!', 
+          type: 'error' 
+        });
+      }
+    } catch (error) {
+      setNotification({ 
+        show: true, 
+        message: 'Terjadi kesalahan saat membersihkan storage!', 
+        type: 'error' 
+      });
+      console.error('Storage cleanup error:', error);
+    } finally {
+      setCleanupLoading(false);
+    }
   };
 
   // ------------------- PROJECTS CRUD -------------------
@@ -1638,6 +1689,98 @@ export default function AdminPage() {
                   </form>
                 </ModalForm>
               )}
+            </section>
+          )}
+
+          {/* Storage Tab */}
+          {tab === "storage" && (
+            <section className="bg-white rounded-xl shadow-lg p-8 border border-blue-200">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="font-bold text-blue-800 text-xl">Storage Management</h3>
+                <div className="text-sm text-gray-600">
+                  Kelola file-file yang tersimpan di Supabase Storage
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Cleanup Unused Files */}
+                <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-6 rounded-lg border border-blue-200">
+                  <h4 className="font-bold text-blue-800 text-lg mb-3 flex items-center gap-2">
+                    <FaDatabase className="text-blue-600" />
+                    Cleanup File Tidak Terpakai
+                  </h4>
+                  <p className="text-gray-700 mb-4 text-sm">
+                    Hapus file-file di storage yang tidak lagi digunakan oleh project, certificate, atau experience manapun.
+                  </p>
+                  <button
+                    onClick={() => handleStorageCleanup('unused')}
+                    disabled={cleanupLoading}
+                    className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2 transition-colors"
+                  >
+                    {cleanupLoading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <FaDatabase />
+                        Cleanup Unused Files
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {/* Cleanup Old Files */}
+                <div className="bg-gradient-to-br from-orange-50 to-red-50 p-6 rounded-lg border border-orange-200">
+                  <h4 className="font-bold text-orange-800 text-lg mb-3 flex items-center gap-2">
+                    <FaDatabase className="text-orange-600" />
+                    Cleanup File Lama
+                  </h4>
+                  <p className="text-gray-700 mb-4 text-sm">
+                    Hapus file-file yang sudah lebih dari 30 hari dan tidak digunakan.
+                  </p>
+                  <button
+                    onClick={() => handleStorageCleanup('old')}
+                    disabled={cleanupLoading}
+                    className="bg-orange-600 hover:bg-orange-700 disabled:bg-orange-400 text-white px-4 py-2 rounded-lg font-semibold text-sm flex items-center gap-2 transition-colors"
+                  >
+                    {cleanupLoading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <FaDatabase />
+                        Cleanup Old Files
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Cleanup Results */}
+              {cleanupResult && (
+                <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <h5 className="font-bold text-green-800 mb-2">Hasil Cleanup:</h5>
+                  <p className="text-green-700">
+                    <strong>{cleanupResult.deletedCount}</strong> file berhasil dihapus
+                  </p>
+                  <p className="text-green-600 text-sm mt-1">{cleanupResult.message}</p>
+                </div>
+              )}
+
+              {/* Storage Info */}
+              <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                <h5 className="font-bold text-gray-800 mb-2">Informasi Storage:</h5>
+                <ul className="text-gray-700 text-sm space-y-1">
+                  <li>• File yang tidak digunakan akan dihapus secara otomatis setelah menghapus project/certificate/experience</li>
+                  <li>• Cleanup manual dapat dilakukan kapan saja melalui tombol di atas</li>
+                  <li>• File yang dihapus tidak dapat dikembalikan</li>
+                  <li>• Proses cleanup berjalan di background dan mungkin membutuhkan beberapa detik</li>
+                </ul>
+              </div>
             </section>
           )}
         </div>

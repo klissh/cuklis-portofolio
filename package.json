@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "cleanup:storage": "node scripts/cleanup-storage.js",
+    "cleanup:storage:old": "node scripts/cleanup-storage.js --mode=old --days=30"
   },
   "dependencies": {
     "@studio-freight/lenis": "^1.0.42",

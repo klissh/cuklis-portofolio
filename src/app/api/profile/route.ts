@@ -23,7 +23,7 @@ export async function GET() {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, bio, description, titles, cv_url } = body;
+    const { name, bio, description, titles, cv_url, photo_url } = body;
 
     // Cek apakah profile sudah ada
     const { data: existingProfile } = await supabase
@@ -41,7 +41,8 @@ export async function PUT(request: NextRequest) {
           bio: bio || '',
           description: description || '',
           titles: titles || '[]',
-          cv_url: cv_url || ''
+          cv_url: cv_url || '',
+          photo_url: photo_url || ''
         })
         .eq('id', existingProfile.id)
         .select()
@@ -61,7 +62,8 @@ export async function PUT(request: NextRequest) {
           bio: bio || '',
           description: description || '',
           titles: titles || '[]',
-          cv_url: cv_url || ''
+          cv_url: cv_url || '',
+          photo_url: photo_url || ''
         }])
         .select()
         .single();

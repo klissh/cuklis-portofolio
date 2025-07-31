@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { supabase } from '@/utils/supabaseClient';
+import { cleanupUnusedFiles } from '@/utils/storageCleanup';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query;
@@ -20,6 +21,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .delete()
       .eq('id', id);
     if (error) return res.status(500).json({ error: error.message });
+    
+    // Jalankan cleanup otomatis setelah delete
+    try {
+      await cleanupUnusedFiles();
+      console.log('Storage cleanup completed after experience deletion');
+    } catch (cleanupError) {
+      console.error('Error during storage cleanup:', cleanupError);
+      // Tidak mengembalikan error karena delete sudah berhasil
+    }
+    
     return res.status(204).end();
   }
 
@@ -34,4 +45,4 @@ export async function uploadImage(file: File, bucket: string) {
   // Ambil public URL
   const { data: publicUrlData } = supabase.storage.from(bucket).getPublicUrl(fileName);
   return publicUrlData.publicUrl;
-} 
+}
