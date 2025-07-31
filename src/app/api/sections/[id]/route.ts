@@ -4,7 +4,7 @@ import { supabase } from '@/utils/supabaseClient';
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Pengecekan autentikasi admin
@@ -16,7 +16,8 @@ export async function PUT(
 
     const body = await request.json();
     const { type, skills } = body;
-    const id = params.id;
+    const resolvedParams = await params;
+    const id = resolvedParams.id;
 
     // Validasi input
     if (!type || !['develop', 'create'].includes(type)) {
@@ -47,7 +48,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Pengecekan autentikasi admin
@@ -57,7 +58,8 @@ export async function DELETE(
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
-    const id = params.id;
+    const resolvedParams = await params;
+    const id = resolvedParams.id;
 
     const { error } = await supabase
       .from('sections')
