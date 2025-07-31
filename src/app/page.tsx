@@ -58,7 +58,6 @@ interface Project {
 interface Certificate {
   id: number;
   title: string;
-  description: string;
   image: string;
   link: string;
   created_at: string;

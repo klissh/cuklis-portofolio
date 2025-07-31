@@ -12,8 +12,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (req.method === 'POST') {
     // Create new certificate
-    const { title, description, image, link } = req.body;
-    const { data, error } = await supabase.from('certificates').insert([{ title, description, image, link }]);
+    const { title, image, link } = req.body;
+    const { data, error } = await supabase.from('certificates').insert([{ title, image, link }]);
     if (error) return res.status(500).json({ error: error.message });
     return res.status(201).json(data);
   }

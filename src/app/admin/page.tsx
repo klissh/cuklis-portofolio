@@ -61,7 +61,6 @@ interface SectionForm {
 interface Certificate {
   id: number;
   title: string;
-  description: string;
   image: string;
   link: string;
   created_at: string;
@@ -327,7 +326,7 @@ export default function AdminPage() {
     fetchCertificates();
   };
   const handleCertificateEdit = (c: Certificate) => {
-    setCertificateForm({ title: c.title, description: c.description, image: c.image, link: c.link });
+    setCertificateForm({ title: c.title, image: c.image, link: c.link });
     setEditCertificateId(c.id);
   };
   const handleCertificateDelete = async (id: number) => {
@@ -1013,7 +1012,6 @@ export default function AdminPage() {
                       <thead>
                         <tr className="bg-blue-200 text-blue-900 font-bold">
                           <th className="p-3 px-6 text-left min-w-[180px]">Title</th>
-                          <th className="p-3 px-6 text-left min-w-[220px]">Description</th>
                           <th className="p-3 px-4 text-center w-32">Link</th>
                           <th className="p-3 px-4 text-center w-28">Image</th>
                           <th className="p-3 px-4 text-center w-36">Action</th>
@@ -1029,7 +1027,6 @@ export default function AdminPage() {
                             }
                           >
                             <td className="p-3 px-6 font-semibold text-blue-900 align-middle">{c.title}</td>
-                            <td className="p-3 px-6 text-gray-700 align-middle">{c.description}</td>
                             <td className="p-3 px-4 text-center align-middle">
                               <a href={c.link} className="text-cyan-700 underline" target="_blank" rel="noopener noreferrer">
                                 Visit
@@ -1052,7 +1049,7 @@ export default function AdminPage() {
                                     setShowCertificateForm(true);
                                     setCertificateFormMode("edit");
                                     setSelectedCertificate(c);
-                                    setCertificateForm({ title: c.title, description: c.description, image: c.image, link: c.link });
+                                    setCertificateForm({ title: c.title, image: c.image, link: c.link });
                                     setEditCertificateId(c.id);
                                     setCertificateImageFile(null);
                                   }}
@@ -1099,16 +1096,6 @@ export default function AdminPage() {
                           name="title"
                           placeholder="Title"
                           value={certificateForm.title || ""}
-                          onChange={handleCertificateForm}
-                          className="bg-white border border-gray-400 text-gray-900 placeholder:text-gray-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 shadow-sm p-3 rounded-lg w-full"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-blue-900 font-bold mb-1 block">Description</label>
-                        <textarea
-                          name="description"
-                          placeholder="Description"
-                          value={certificateForm.description || ""}
                           onChange={handleCertificateForm}
                           className="bg-white border border-gray-400 text-gray-900 placeholder:text-gray-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 shadow-sm p-3 rounded-lg w-full"
                         />
@@ -1184,17 +1171,17 @@ export default function AdminPage() {
                   <div className="py-8 text-center text-gray-400 font-semibold">Belum ada experience.</div>
                 ) : (
                   <div className="overflow-x-auto">
-                    <table className="w-full text-base border border-blue-200 rounded-lg overflow-hidden">
+                    <table className="w-full text-sm border border-blue-200 rounded-lg overflow-hidden">
                       <thead>
                         <tr className="bg-blue-200 text-blue-900 font-bold">
-                          <th className="p-3 px-6 text-left min-w-[180px]">Title</th>
-                          <th className="p-3 px-6 text-left min-w-[140px]">Company</th>
-                          <th className="p-3 px-6 text-left min-w-[220px]">Description</th>
-                          <th className="p-3 px-4 text-center w-24">Date Start</th>
-                          <th className="p-3 px-4 text-center w-24">Date End</th>
-                          <th className="p-3 px-4 text-center w-28">Link</th>
-                          <th className="p-3 px-4 text-center w-28">Image</th>
-                          <th className="p-3 px-4 text-center w-28">Action</th>
+                          <th className="p-2 px-3 text-left min-w-[120px]">Title</th>
+                          <th className="p-2 px-3 text-left min-w-[100px]">Company</th>
+                          <th className="p-2 px-3 text-left min-w-[150px]">Description</th>
+                          <th className="p-2 px-2 text-center w-20">Start</th>
+                          <th className="p-2 px-2 text-center w-20">End</th>
+                          <th className="p-2 px-2 text-center w-16">Link</th>
+                          <th className="p-2 px-2 text-center w-16">Image</th>
+                          <th className="p-2 px-2 text-center w-32">Action</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1206,30 +1193,34 @@ export default function AdminPage() {
                               " border-b border-blue-200 hover:bg-blue-100 transition"
                             }
                           >
-                            <td className="p-3 px-6 font-semibold text-blue-900 align-middle">{exp.title}</td>
-                            <td className="p-3 px-6 text-blue-800 align-middle">{exp.company || '-'}</td>
-                            <td className="p-3 px-6 text-gray-700 align-middle">{exp.description}</td>
-                            <td className="p-3 px-4 text-blue-800 font-semibold text-center align-middle">{exp.date_start}</td>
-                            <td className="p-3 px-4 text-blue-800 font-semibold text-center align-middle">{exp.date_end || '-'}</td>
-                            <td className="p-3 px-4 text-center align-middle">
+                            <td className="p-2 px-3 font-semibold text-blue-900 align-middle text-sm">{exp.title}</td>
+                            <td className="p-2 px-3 text-blue-800 align-middle text-sm">{exp.company || '-'}</td>
+                            <td className="p-2 px-3 text-gray-700 align-middle text-sm">
+                              <div className="max-w-[150px] truncate" title={exp.description}>
+                                {exp.description}
+                              </div>
+                            </td>
+                            <td className="p-2 px-2 text-blue-800 font-semibold text-center align-middle text-xs">{exp.date_start}</td>
+                            <td className="p-2 px-2 text-blue-800 font-semibold text-center align-middle text-xs">{exp.date_end || '-'}</td>
+                            <td className="p-2 px-2 text-center align-middle">
                               {exp.link && (
-                                <a href={exp.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Link</a>
+                                <a href={exp.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline text-xs">Link</a>
                               )}
                             </td>
-                            <td className="p-3 px-4 text-center align-middle">
+                            <td className="p-2 px-2 text-center align-middle">
                               {exp.image && (
                                 <img
                                   src={exp.image}
                                   alt="Experience"
-                                  className="w-12 h-12 object-cover rounded border border-blue-200 mx-auto"
+                                  className="w-8 h-8 object-cover rounded border border-blue-200 mx-auto"
                                 />
                               )}
                             </td>
-                            <td className="p-3 px-4 text-center align-middle">
-                              <div className="flex items-center justify-center space-x-2">
+                            <td className="p-2 px-2 text-center align-middle">
+                              <div className="flex items-center justify-center space-x-1">
                                 {/* Tombol Naik */}
                                 <button
-                                  className="flex items-center bg-gray-300 hover:bg-gray-400 text-blue-900 px-2 py-1 rounded font-bold text-xs"
+                                  className="bg-gray-300 hover:bg-gray-400 text-blue-900 px-1 py-1 rounded text-xs"
                                   disabled={i === 0}
                                   onClick={async () => {
                                     if (i === 0) return;
@@ -1253,7 +1244,7 @@ export default function AdminPage() {
                                 </button>
                                 {/* Tombol Turun */}
                                 <button
-                                  className="flex items-center bg-gray-300 hover:bg-gray-400 text-blue-900 px-2 py-1 rounded font-bold text-xs"
+                                  className="bg-gray-300 hover:bg-gray-400 text-blue-900 px-1 py-1 rounded text-xs"
                                   disabled={i === experiences.length - 1}
                                   onClick={async () => {
                                     if (i === experiences.length - 1) return;
@@ -1276,7 +1267,7 @@ export default function AdminPage() {
                                   ▼
                                 </button>
                                 <button
-                                  className="flex items-center bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded-lg font-semibold text-sm gap-1"
+                                  className="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded text-xs"
                                   onClick={() => {
                                     setShowExpForm(true);
                                     setExpFormMode("edit");
@@ -1287,16 +1278,14 @@ export default function AdminPage() {
                                   }}
                                   title="Edit"
                                 >
-                                  <MdEdit size={18} />
-                                  <span>Edit</span>
+                                  <MdEdit size={14} />
                                 </button>
                                 <button
-                                  className="flex items-center bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg font-semibold text-sm gap-1"
+                                  className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs"
                                   onClick={() => handleExpDelete(exp.id)}
                                   title="Delete"
                                 >
-                                  <MdDelete size={18} />
-                                  <span>Hapus</span>
+                                  <MdDelete size={14} />
                                 </button>
                               </div>
                             </td>

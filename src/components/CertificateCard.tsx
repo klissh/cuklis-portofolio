@@ -7,7 +7,6 @@ interface CertificateCardProps {
     id: number;
     number: string;
     title: string;
-    description: string;
     imageSrc: string; 
     link: string; 
   };
@@ -21,37 +20,30 @@ const CertificateCard: React.FC<CertificateCardProps> = React.memo(({ certificat
   // Determine the layout pattern based on the index (0, 1, 2, 3 repeats)
   const pattern = index % 4;
 
-  // Define classes for positioning the large certificate number absolutely
-  let numberPositionClasses = '';
   // Define classes for text alignment of the content block
   let contentAlignmentClasses = '';
   // Define order classes for the image and text blocks
   let imageOrderClass = '';
   let textOrderClass = '';
 
-
   switch (pattern) {
-    case 0: // Pattern 1: Number Top-Left, Text Top-Right, Image Below Text
-      numberPositionClasses = 'top-4 left-4'; // Added padding from edge
-      contentAlignmentClasses = 'text-right items-end'; // Align text to the right
+    case 0: // Pattern 1: Text Center, Image Below Text
+      contentAlignmentClasses = 'text-center items-center'; // Align text to center
       textOrderClass = 'order-1'; // Text comes first
       imageOrderClass = 'order-2'; // Image comes second
       break;
-    case 1: // Pattern 2: Number Bottom-Left, Text Top-Right, Image Above Text
-      numberPositionClasses = 'bottom-4 left-4'; // Added padding from edge
-      contentAlignmentClasses = 'text-right items-end'; // Align text to the right
+    case 1: // Pattern 2: Text Center, Image Above Text
+      contentAlignmentClasses = 'text-center items-center'; // Align text to center
       textOrderClass = 'order-2'; // Text comes second
       imageOrderClass = 'order-1'; // Image comes first
       break;
-    case 2: // Pattern 3: Number Top-Right, Text Top-Left, Image Below Text
-      numberPositionClasses = 'top-4 right-4'; // Added padding from edge
-      contentAlignmentClasses = 'text-left items-start'; // Align text to the left
+    case 2: // Pattern 3: Text Center, Image Below Text
+      contentAlignmentClasses = 'text-center items-center'; // Align text to center
       textOrderClass = 'order-1'; // Text comes first
       imageOrderClass = 'order-2'; // Image comes second
       break;
-    case 3: // Pattern 4: Number Bottom-Right, Text Top-Left, Image Above Text
-      numberPositionClasses = 'bottom-4 right-4'; // Added padding from edge
-      contentAlignmentClasses = 'text-left items-start'; // Align text to the left
+    case 3: // Pattern 4: Text Center, Image Above Text
+      contentAlignmentClasses = 'text-center items-center'; // Align text to center
       textOrderClass = 'order-2'; // Text comes second
       imageOrderClass = 'order-1'; // Image comes first
       break;
@@ -67,7 +59,6 @@ const CertificateCard: React.FC<CertificateCardProps> = React.memo(({ certificat
   return (
     // Use motion.div for potential future animations (like fade-in on scroll)
     // Add a thin white border and transparent background
-    // Use 'relative' for positioning context for the absolute number
     // Use flex-col to stack content vertically, justify-between to space text and image
     // Removed aspect-square to allow height to be determined by content
     <motion.div
@@ -75,20 +66,14 @@ const CertificateCard: React.FC<CertificateCardProps> = React.memo(({ certificat
       // Optional: Add Framer Motion initial/animate/whileHover props here (for the whole card)
       // For example: initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
     >
-      {/* Large Certificate Number - Absolutely Positioned */}
-      <div className={`absolute md:text-6xl text-3xl p-6 font-bold text-white text-opacity-10 ${numberPositionClasses}`}>
-        {certificate.number}
-      </div>
-
       {/* Content Area (Text Block and Image Block) */}
       <div className="flex flex-col justify-between h-full">
 
-        {/* Text Content Block (Title, Description) */}
+        {/* Text Content Block (Title only) */}
         <div className={`flex flex-col ${contentAlignmentClasses} ${textOrderClass} z-10 p-6`}>
-            {/* Title and Description */}
+            {/* Title only */}
             <div>
               <h3 className="md:text-xl text-md font-semibold text-white">{certificate.title}</h3>
-              <p className="md:text-sm text-xs text-gray-400">{certificate.description}</p>
             </div>
         </div>
 

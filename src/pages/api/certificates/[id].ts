@@ -6,10 +6,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const { id } = req.query;
 
   if (req.method === 'PUT') {
-    const { title, description, image, link } = req.body;
+    const { title, image, link } = req.body;
     const { data, error } = await supabase
       .from('certificates')
-      .update({ title, description, image, link })
+      .update({ title, image, link })
       .eq('id', id);
     if (error) return res.status(500).json({ error: error.message });
     return res.status(200).json(data);
