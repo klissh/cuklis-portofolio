@@ -62,7 +62,7 @@ const CertificateCard: React.FC<CertificateCardProps> = React.memo(({ certificat
     // Use flex-col to stack content vertically, justify-between to space text and image
     // Removed aspect-square to allow height to be determined by content
     <motion.div
-      className="relative flex flex-col justify-between py-6 px-15 md:m-0 m-5 border border-white border-opacity-20 bg-transparent overflow-hidden h-full"
+      className="relative flex flex-col justify-between py-3 md:py-6 px-2 md:px-15 md:m-0 m-1 border border-white border-opacity-20 bg-transparent overflow-hidden h-full"
       // Optional: Add Framer Motion initial/animate/whileHover props here (for the whole card)
       // For example: initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
     >
@@ -70,31 +70,31 @@ const CertificateCard: React.FC<CertificateCardProps> = React.memo(({ certificat
       <div className="flex flex-col justify-between h-full">
 
         {/* Text Content Block (Title only) */}
-        <div className={`flex flex-col ${contentAlignmentClasses} ${textOrderClass} z-10 p-6`}>
+        <div className={`flex flex-col ${contentAlignmentClasses} ${textOrderClass} z-10 p-2 md:p-6`}>
             {/* Title only */}
             <div>
-              <h3 className="md:text-xl text-md font-semibold text-white">{certificate.title}</h3>
+              <h3 className="md:text-xl text-sm font-semibold text-white line-clamp-2">{certificate.title}</h3>
             </div>
         </div>
 
-        {/* Certificate Image Block - Now a motion.div to handle animations and clicks */}
-        {/* Added flex-grow to help manage space within the flex container */}
-        {/* Added initial opacity, hover effects, transition, and onClick handler */}
+        {/* Certificate Image Block - Clean image display without background or padding */}
         <motion.div
-            className={`relative w-full aspect-square flex-grow rounded-xl overflow-hidden z-10 ${imageOrderClass} bg-neutral-900 p-4 flex items-center justify-center`}
+            className={`relative w-full flex-grow rounded-xl overflow-hidden z-10 ${imageOrderClass} flex items-center justify-center`}
             initial={{ opacity: 0.7 }}
             whileHover={{ opacity: 1, scale: 1.05 }}
             transition={{ duration: 0.3 }}
             onClick={handleImageClick}
         >
-            <Image
-              src={certificate.imageSrc}
-              alt={`${certificate.title} certificate`}
-              fill
-              className="object-contain w-full h-full"
-              sizes="(max-width: 768px) 100vw, 33vw"
-              style={{ minHeight: 0, minWidth: 0 }}
-            />
+            <div className="relative w-full h-auto">
+              <Image
+                src={certificate.imageSrc}
+                alt={`${certificate.title} certificate`}
+                width={400}
+                height={300}
+                className="object-contain w-full h-auto rounded-lg"
+                sizes="(max-width: 768px) 100vw, 33vw"
+              />
+            </div>
         </motion.div>
 
       </div> {/* End Content Area */}

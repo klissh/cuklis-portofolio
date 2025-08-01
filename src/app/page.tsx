@@ -134,6 +134,29 @@ export default function Home() {
       });
   }, []);
 
+  // State untuk show/hide projects, certificates, dan skills
+  const [showAllProjects, setShowAllProjects] = useState(false);
+  const [showAllCertificates, setShowAllCertificates] = useState(false);
+  const [showAllSkills, setShowAllSkills] = useState(false);
+
+  // Fungsi untuk menghitung jumlah baris berdasarkan jumlah item dan kolom
+  const calculateRows = (itemCount: number, columns: number = 3) => {
+    return Math.ceil(itemCount / columns);
+  };
+
+  // Menentukan apakah perlu menampilkan tombol show/hide
+  const projectRows = calculateRows(projects.length);
+  const certificateRows = calculateRows(certificates.length);
+  const skillRows = calculateRows(skillsFromCreate.length, 5); // Skills menggunakan 5 kolom pada xl
+  const shouldShowProjectsButton = projectRows > 3;
+  const shouldShowCertificatesButton = certificateRows > 3;
+  const shouldShowSkillsButton = skillRows > 3;
+
+  // Menentukan jumlah item yang ditampilkan
+  const displayedProjects = showAllProjects ? projects : projects.slice(0, 9); // 3 baris x 3 kolom = 9 item
+  const displayedCertificates = showAllCertificates ? certificates : certificates.slice(0, 9);
+  const displayedSkills = showAllSkills ? skillsFromCreate : skillsFromCreate.slice(0, 15); // 3 baris x 5 kolom = 15 item
+
   // Removed mobileMenuOpen state
   return (
     // The cursor: 'none' style is now applied globally in layout.tsx
@@ -255,15 +278,15 @@ export default function Home() {
             {/* Skill dan Tools saya Card */}
             <div className="relative p-4 md:p-6 rounded-lg transition-transform duration-300 ease-in-out hover:scale-105 custom-corner-border w-full lg:flex-1 lg:max-w-2xl">
               <h3 className="text-white font-bold text-xl md:text-2xl tracking-wide mb-4">
-                Skill dan Tools saya
+                Skills And Tools
               </h3>
               {/* Grid untuk skills dengan logo - responsif untuk mobile, desktop tetap 4 kolom */}
               <div className="grid grid-cols-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 md:gap-4 lg:gap-6">
                 {/* Menampilkan skills dari createSection */}
-                {skillsFromCreate.map((skill: any, index: number) => (
-                  <div key={index} className="bg-transparent border-2 border-white rounded-lg px-4 py-5 flex flex-col items-center justify-center text-center h-[110px] w-[110px] sm:h-[100px] sm:w-[100px] md:h-[95px] md:w-[95px] lg:h-[90px] lg:w-[90px] xl:h-[85px] xl:w-[85px] hover:bg-white/10 transition-all duration-300 hover:scale-105 shadow-lg mx-auto" style={{boxShadow: 'inset 0 0 0 4px transparent, 0 0 0 4px rgba(0,0,0,0.8)'}}>
+                {displayedSkills.map((skill: any, index: number) => (
+                  <div key={index} className="bg-transparent border-2 border-white rounded-lg px-2 py-3 sm:px-3 sm:py-4 flex flex-col items-center justify-center text-center h-[80px] w-[80px] sm:h-[90px] sm:w-[90px] hover:bg-white/10 transition-all duration-300 hover:scale-105 shadow-lg mx-auto" style={{boxShadow: 'inset 0 0 0 4px transparent, 0 0 0 4px rgba(0,0,0,0.8)'}}>
                     {skill.logo && (
-                      <div className="w-8 h-8 sm:w-7 sm:h-7 md:w-6 md:h-6 lg:w-6 lg:h-6 xl:w-5 xl:h-5 mb-3 sm:mb-2 flex items-center justify-center flex-shrink-0">
+                      <div className="w-6 h-6 sm:w-7 sm:h-7 mb-2 sm:mb-2 flex items-center justify-center flex-shrink-0">
                         <img 
                           src={skill.logo} 
                           alt={skill.name} 
@@ -274,15 +297,15 @@ export default function Home() {
                         />
                       </div>
                     )}
-                    <span className="text-sm sm:text-xs md:text-xs lg:text-xs xl:text-xs text-gray-300 font-medium line-clamp-2 leading-tight text-center px-1">{skill.name}</span>
+                    <span className="text-xs sm:text-xs text-gray-300 font-medium line-clamp-2 leading-tight text-center px-1">{skill.name}</span>
                   </div>
                 ))}
                 {/* Jika tidak ada skills, tampilkan placeholder */}
                 {skillsFromCreate.length === 0 && (
                   <>
                     {Array.from({ length: 8 }, (_, i) => (
-                      <div key={i} className="bg-transparent border-2 border-white rounded-lg px-4 py-5 flex flex-col items-center justify-center text-center h-[110px] w-[110px] sm:h-[100px] sm:w-[100px] md:h-[95px] md:w-[95px] lg:h-[90px] lg:w-[90px] xl:h-[85px] xl:w-[85px] hover:bg-white/10 transition-all duration-300 hover:scale-105 shadow-lg mx-auto" style={{boxShadow: 'inset 0 0 0 4px transparent, 0 0 0 4px rgba(0,0,0,0.8)'}}>
-                        <div className="w-8 h-8 sm:w-7 sm:h-7 md:w-6 md:h-6 lg:w-6 lg:h-6 xl:w-5 xl:h-5 mb-3 sm:mb-2 flex items-center justify-center flex-shrink-0">
+                      <div key={i} className="bg-transparent border-2 border-white rounded-lg px-2 py-3 sm:px-3 sm:py-4 flex flex-col items-center justify-center text-center h-[80px] w-[80px] sm:h-[90px] sm:w-[90px] hover:bg-white/10 transition-all duration-300 hover:scale-105 shadow-lg mx-auto" style={{boxShadow: 'inset 0 0 0 4px transparent, 0 0 0 4px rgba(0,0,0,0.8)'}}>
+                        <div className="w-6 h-6 sm:w-7 sm:h-7 mb-2 sm:mb-2 flex items-center justify-center flex-shrink-0">
                           <img 
                             src={`/techstack/php.svg`} 
                             alt="placeholder" 
@@ -292,12 +315,30 @@ export default function Home() {
                             }}
                           />
                         </div>
-                        <span className="text-sm sm:text-xs md:text-xs lg:text-xs xl:text-xs text-gray-300 font-medium line-clamp-2 leading-tight text-center px-1">PHP</span>
+                        <span className="text-xs sm:text-xs text-gray-300 font-medium line-clamp-2 leading-tight text-center px-1">PHP</span>
                       </div>
                     ))}
                   </>
                 )}
               </div>
+              
+              {/* Show/Hide Button untuk Skills */}
+              {shouldShowSkillsButton && (
+                <div className="flex justify-center mt-4">
+                  <button
+                    onClick={() => setShowAllSkills(!showAllSkills)}
+                    className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-6 py-3 rounded-lg font-bold text-sm uppercase tracking-wider transition-all duration-300 hover:from-blue-400 hover:to-cyan-400 hover:scale-105 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(6,182,212,0.4)] shadow-[0_0_10px_rgba(59,130,246,0.3)] border border-blue-400/30 backdrop-blur-sm"
+                    style={{
+                      textShadow: '0 0 10px rgba(59,130,246,0.8)',
+                      boxShadow: '0 0 15px rgba(59,130,246,0.4), inset 0 1px 0 rgba(255,255,255,0.2)'
+                    }}
+                  >
+                    <span className="relative z-10">
+                      {showAllSkills ? 'Hide Skills' : `Show All Skills (${skillsFromCreate.length})`}
+                    </span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
           {/* Tech Stack Section End */}
@@ -367,24 +408,44 @@ export default function Home() {
         </div>
 
         {/* Projects Section Start */}
-        <div className="grid grid-cols-1 md:grid-cols-3 w-full max-w-[1400px] mx-auto mt-4 md:mt-10">
-          {loading ? (
-            <div className="col-span-3 text-center">Loading...</div>
-          ) : (
-            projects.map((project, index) => (
-              <ProjectCard
-                key={project.id}
-                project={{
-                  ...project,
-                  imageSrc: project.image, // mapping ke prop ProjectCard
-                  number: (index + 1).toString().padStart(2, '0'), // jika butuh nomor urut
-                  techstack: [], // kosongkan atau fetch jika ada field di DB
+        <div className="w-full max-w-[1400px] mx-auto">
+          <div className="grid grid-cols-3 w-full mt-4 md:mt-10 gap-2 md:gap-4">
+            {loading ? (
+              <div className="col-span-3 text-center">Loading...</div>
+            ) : (
+              displayedProjects.map((project, index) => (
+                <ProjectCard
+                  key={project.id}
+                  project={{
+                    ...project,
+                    imageSrc: project.image, // mapping ke prop ProjectCard
+                    number: (index + 1).toString().padStart(2, '0'), // jika butuh nomor urut
+                    techstack: [], // kosongkan atau fetch jika ada field di DB
+                  }}
+                  index={index}
+                />
+              ))
+            )}
+          </div>
+          
+          {/* Show/Hide Button untuk Projects */}
+          {shouldShowProjectsButton && (
+            <div className="flex justify-center mt-6">
+              <button
+                onClick={() => setShowAllProjects(!showAllProjects)}
+                className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-6 py-3 rounded-lg font-bold text-sm uppercase tracking-wider transition-all duration-300 hover:from-blue-400 hover:to-cyan-400 hover:scale-105 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(6,182,212,0.4)] shadow-[0_0_10px_rgba(59,130,246,0.3)] border border-blue-400/30 backdrop-blur-sm"
+                style={{
+                  textShadow: '0 0 10px rgba(59,130,246,0.8)',
+                  boxShadow: '0 0 15px rgba(59,130,246,0.4), inset 0 1px 0 rgba(255,255,255,0.2)'
                 }}
-                index={index}
-              />
-            ))
+              >
+                <span className="relative z-10">
+                  {showAllProjects ? 'Hide Projects' : `Show All Projects (${projects.length})`}
+                </span>
+              </button>
+            </div>
           )}
-           </div>
+        </div>
         {/* Projects Section End */}
 
         <div id="certificates" className="flex w-full items-center justify-center p-4 mt-16 md:mt-25 font-extrabold" style={{ scrollMarginTop: '120px' }}>
@@ -399,23 +460,43 @@ export default function Home() {
         </div>
 
         {/* Certificates Section Start */}
-        <div className="grid grid-cols-1 md:grid-cols-3 w-full max-w-[1400px] mx-auto mt-4 md:mt-10">
-          {loading ? (
-            <div className="col-span-3 text-center">Loading...</div>
-          ) : (
-            certificates.map((certificate, index) => (
-              <CertificateCard
-                key={certificate.id}
-                certificate={{
-                  ...certificate,
-                  imageSrc: certificate.image, // mapping ke prop CertificateCard
-                  number: (index + 1).toString().padStart(2, '0'), // jika butuh nomor urut
+        <div className="w-full max-w-[1400px] mx-auto">
+          <div className="grid grid-cols-3 w-full mt-4 md:mt-10 gap-2 md:gap-4">
+            {loading ? (
+              <div className="col-span-3 text-center">Loading...</div>
+            ) : (
+              displayedCertificates.map((certificate, index) => (
+                <CertificateCard
+                  key={certificate.id}
+                  certificate={{
+                    ...certificate,
+                    imageSrc: certificate.image, // mapping ke prop CertificateCard
+                    number: (index + 1).toString().padStart(2, '0'), // jika butuh nomor urut
+                  }}
+                  index={index}
+                />
+              ))
+            )}
+          </div>
+          
+          {/* Show/Hide Button untuk Certificates */}
+          {shouldShowCertificatesButton && (
+            <div className="flex justify-center mt-6">
+              <button
+                onClick={() => setShowAllCertificates(!showAllCertificates)}
+                className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-6 py-3 rounded-lg font-bold text-sm uppercase tracking-wider transition-all duration-300 hover:from-blue-400 hover:to-cyan-400 hover:scale-105 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(6,182,212,0.4)] shadow-[0_0_10px_rgba(59,130,246,0.3)] border border-blue-400/30 backdrop-blur-sm"
+                style={{
+                  textShadow: '0 0 10px rgba(59,130,246,0.8)',
+                  boxShadow: '0 0 15px rgba(59,130,246,0.4), inset 0 1px 0 rgba(255,255,255,0.2)'
                 }}
-                index={index}
-              />
-            ))
+              >
+                <span className="relative z-10">
+                  {showAllCertificates ? 'Hide Certificates' : `Show All Certificates (${certificates.length})`}
+                </span>
+              </button>
+            </div>
           )}
-           </div>
+        </div>
         {/* Certificates Section End */}
       </main>
 
