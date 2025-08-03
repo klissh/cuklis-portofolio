@@ -134,10 +134,34 @@ export default function Home() {
       });
   }, []);
 
+  // useEffect untuk menghitung items per row berdasarkan ukuran layar
+  useEffect(() => {
+    const updateItemsPerRow = () => {
+      if (typeof window !== 'undefined') {
+        if (window.innerWidth >= 1280) { // xl
+          setItemsPerRow(5);
+        } else if (window.innerWidth >= 1024) { // lg
+          setItemsPerRow(4);
+        } else if (window.innerWidth >= 768) { // md
+          setItemsPerRow(3);
+        } else if (window.innerWidth >= 640) { // sm
+          setItemsPerRow(2);
+        } else {
+          setItemsPerRow(3); // mobile default
+        }
+      }
+    };
+
+    updateItemsPerRow();
+    window.addEventListener('resize', updateItemsPerRow);
+    return () => window.removeEventListener('resize', updateItemsPerRow);
+  }, []);
+
   // State untuk show/hide projects, certificates, dan skills
   const [showAllProjects, setShowAllProjects] = useState(false);
   const [showAllCertificates, setShowAllCertificates] = useState(false);
   const [showAllSkills, setShowAllSkills] = useState(false);
+  const [itemsPerRow, setItemsPerRow] = useState(5);
 
   // Fungsi untuk menghitung jumlah baris berdasarkan jumlah item dan kolom
   const calculateRows = (itemCount: number, columns: number = 3) => {
@@ -228,9 +252,9 @@ export default function Home() {
         </div>
         {/* Marquee Section End */}
 
-        <div id="about" className="flex-grow flex flex-col md:flex-row items-center justify-center w-full w-9xl mt-30 mt-10 space-x-0" style={{ scrollMarginTop: '135px' }}>
+        <div id="about" className="flex flex-col md:flex-row items-center justify-center w-fit mx-auto mt-5" style={{ scrollMarginTop: '135px' }}>
           {/* What I do Section - Heading only, placed above cards on mobile */}
-          <div className="block md:hidden w-full mb-6">
+          <div className="block md:hidden w-fit mb-3 mx-auto">
             <BlurText
               text="What I do"
               delay={150}
@@ -241,9 +265,9 @@ export default function Home() {
             />
           </div>
           {/* Tech Stack Section Start */}
-          <div className="flex flex-col w-full max-w-lg px-4 md:px-0 mt-10 mb-20 space-y-8">
+          <div className="flex flex-col w-fit px-0 mt-5 mb-10 space-y-2">
             {/* Hello, I'm Card */}
-            <div className="relative p-6 rounded-lg transition-transform duration-300 ease-in-out hover:scale-105 custom-corner-border inline-block max-w-max">
+            <div className="relative p-3 md:p-4 rounded-lg transition-transform duration-300 ease-in-out hover:scale-105 custom-corner-border w-full max-w-[430px]">
               <h3 className="text-white font-bold md:text-2xl text-lg tracking-wide mb-3">
                 Hello, I'm
               </h3>
@@ -275,67 +299,79 @@ export default function Home() {
               )}
             </div>
 
-            {/* Skill dan Tools saya Card */}
-            <div className="relative p-4 md:p-6 rounded-lg transition-transform duration-300 ease-in-out hover:scale-105 custom-corner-border w-full lg:flex-1 lg:max-w-2xl">
-              <h3 className="text-white font-bold text-xl md:text-2xl tracking-wide mb-4">
-                Skills And Tools
-              </h3>
-              {/* Grid untuk skills dengan logo - responsif untuk mobile, desktop tetap 4 kolom */}
-              <div className="grid grid-cols-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 md:gap-4 lg:gap-6">
-                {/* Menampilkan skills dari createSection */}
-                {displayedSkills.map((skill: any, index: number) => (
-                  <div key={index} className="bg-transparent border-2 border-white rounded-lg px-2 py-3 sm:px-3 sm:py-4 flex flex-col items-center justify-center text-center h-[80px] w-[80px] sm:h-[90px] sm:w-[90px] hover:bg-white/10 transition-all duration-300 hover:scale-105 shadow-lg mx-auto" style={{boxShadow: 'inset 0 0 0 4px transparent, 0 0 0 4px rgba(0,0,0,0.8)'}}>
-                    {skill.logo && (
-                      <div className="w-6 h-6 sm:w-7 sm:h-7 mb-2 sm:mb-2 flex items-center justify-center flex-shrink-0">
-                        <img 
-                          src={skill.logo} 
-                          alt={skill.name} 
-                          className="w-full h-full object-contain"
-                          onError={(e) => {
-                            e.currentTarget.style.display = 'none';
-                          }}
-                        />
-                      </div>
-                    )}
-                    <span className="text-xs sm:text-xs text-gray-300 font-medium line-clamp-2 leading-tight text-center px-1">{skill.name}</span>
-                  </div>
-                ))}
-                {/* Jika tidak ada skills, tampilkan placeholder */}
-                {skillsFromCreate.length === 0 && (
-                  <>
-                    {Array.from({ length: 8 }, (_, i) => (
-                      <div key={i} className="bg-transparent border-2 border-white rounded-lg px-2 py-3 sm:px-3 sm:py-4 flex flex-col items-center justify-center text-center h-[80px] w-[80px] sm:h-[90px] sm:w-[90px] hover:bg-white/10 transition-all duration-300 hover:scale-105 shadow-lg mx-auto" style={{boxShadow: 'inset 0 0 0 4px transparent, 0 0 0 4px rgba(0,0,0,0.8)'}}>
-                        <div className="w-6 h-6 sm:w-7 sm:h-7 mb-2 sm:mb-2 flex items-center justify-center flex-shrink-0">
-                          <img 
-                            src={`/techstack/php.svg`} 
-                            alt="placeholder" 
-                            className="w-full h-full object-contain"
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                            }}
-                          />
-                        </div>
-                        <span className="text-xs sm:text-xs text-gray-300 font-medium line-clamp-2 leading-tight text-center px-1">PHP</span>
-                      </div>
-                    ))}
-                  </>
-                )}
+            {/* Skills And Tools */}
+            <div className="relative p-3 md:p-4 rounded-lg transition-transform duration-300 ease-in-out hover:scale-105 custom-corner-border w-full max-w-[430px]">
+              <div className="flex justify-center w-fit mx-auto">
+                <div className="w-fit">
+                  <h3 className="text-white font-bold md:text-2xl text-lg tracking-wide mb-3 text-center">
+                    Skills And Tools
+                  </h3>
+                </div>
               </div>
+              {/* Container untuk grid dan blur effect */}
+               <div className="relative overflow-hidden w-fit flex justify-center mx-auto">
+                {/* Grid untuk skills dengan logo - responsif untuk mobile, desktop tetap 4 kolom */}
+                <div className="grid grid-cols-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-3 lg:gap-3 xl:gap-3 w-fit">
+                   {/* Menampilkan skills dari createSection */}
+                   {(skillsFromCreate.length > 0 ? skillsFromCreate : Array.from({ length: 20 }, (_, i) => ({ name: 'PHP', logo: '/techstack/php.svg' }))).map((skill: any, index: number) => {
+                      // Hitung posisi baris (mulai dari 0)
+                      const rowIndex = Math.floor(index / itemsPerRow);
+                      const isInRow4OrBeyond = rowIndex >= 3;
+                      const shouldHide = !showAllSkills && rowIndex >= 4; // Sembunyikan baris 5 dan seterusnya
+                      const shouldBlur = !showAllSkills && rowIndex === 3; // Blur seluruh baris 4
+                     
+                     return (
+                       <div 
+                         key={index} 
+                         className={`bg-transparent border-2 border-white rounded-lg px-1 py-1 sm:px-2 sm:py-2 flex flex-col items-center justify-center text-center h-[60px] w-[60px] sm:h-[70px] sm:w-[70px] hover:bg-white/10 transition-all duration-300 hover:scale-105 shadow-lg ${shouldHide ? 'hidden' : ''} ${shouldBlur ? 'blur-sm opacity-60' : ''}`} 
+                         style={{boxShadow: 'inset 0 0 0 4px transparent, 0 0 0 4px rgba(0,0,0,0.8)'}}
+                       >
+                         {skill.logo && (
+                           <div className="w-5 h-5 sm:w-6 sm:h-6 mb-1 sm:mb-2 flex items-center justify-center flex-shrink-0">
+                             <img 
+                               src={skill.logo} 
+                               alt={skill.name} 
+                               className="w-full h-full object-contain"
+                               onError={(e) => {
+                                 e.currentTarget.style.display = 'none';
+                               }}
+                             />
+                           </div>
+                         )}
+                         <span className="text-[10px] sm:text-xs text-gray-300 font-medium line-clamp-2 leading-tight text-center px-0.5">{skill.name}</span>
+                       </div>
+                     );
+                   })}
+                 </div>
+                 
+                 {/* Overlay untuk memotong setengah baris 4 dan memberikan efek fade */}
+                 {!showAllSkills && shouldShowSkillsButton && (
+                   <div className="absolute bottom-0 left-0 right-0 h-[50px] bg-gradient-to-t from-[#101112] via-[#101112]/95 to-transparent pointer-events-none"></div>
+                 )}
+               </div>
               
-              {/* Show/Hide Button untuk Skills */}
+              {/* Show/Hide Button untuk Skills dengan icon plus/minus */}
               {shouldShowSkillsButton && (
                 <div className="flex justify-center mt-4">
-                  <button
+                  <button 
+                    className="group cursor-pointer outline-none hover:rotate-90 duration-300" 
+                    title={showAllSkills ? "Hide Skills" : "Show All Skills"}
                     onClick={() => setShowAllSkills(!showAllSkills)}
-                    className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-6 py-3 rounded-lg font-bold text-sm uppercase tracking-wider transition-all duration-300 hover:from-blue-400 hover:to-cyan-400 hover:scale-105 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(6,182,212,0.4)] shadow-[0_0_10px_rgba(59,130,246,0.3)] border border-blue-400/30 backdrop-blur-sm"
-                    style={{
-                      textShadow: '0 0 10px rgba(59,130,246,0.8)',
-                      boxShadow: '0 0 15px rgba(59,130,246,0.4), inset 0 1px 0 rgba(255,255,255,0.2)'
-                    }}
-                  >
-                    <span className="relative z-10">
-                      {showAllSkills ? 'Hide Skills' : `Show All Skills (${skillsFromCreate.length})`}
-                    </span>
+                  > 
+                    <svg 
+                      className="stroke-teal-500 fill-none group-hover:fill-teal-800 group-active:stroke-teal-200 group-active:fill-teal-600 group-active:duration-0 duration-300" 
+                      viewBox="0 0 24 24" 
+                      height="50px" 
+                      width="50px" 
+                      xmlns="http://www.w3.org/2000/svg"
+                    > 
+                      <path 
+                        strokeWidth="1.5" 
+                        d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z" 
+                      ></path> 
+                      <path strokeWidth="1.5" d="M8 12H16"></path> 
+                      {!showAllSkills && <path strokeWidth="1.5" d="M12 16V8"></path>}
+                    </svg> 
                   </button>
                 </div>
               )}
@@ -344,8 +380,8 @@ export default function Home() {
           {/* Tech Stack Section End */}
 
           {/* What I do Section - Photo and overlay, heading only on desktop */}
-          <div className="flex flex-col md:ml-16 w-full md:w-auto items-center justify-center">
-            <div className="hidden md:block mb-6 w-full">
+          <div className="flex flex-col md:ml-16 w-fit items-center justify-center">
+            <div className="hidden md:block mb-6 w-fit">
               <BlurText
                 text="What I do"
                 delay={150}
@@ -355,7 +391,7 @@ export default function Home() {
                 className="md:text-7xl text-3xl font-extrabold text-center justify-center items-center mx-auto"
               />
             </div>
-            <div className="mt-10 mb-20 w-full flex justify-center">
+            <div className="mt-10 mb-20 w-fit flex justify-center">
               {profile?.name ? (
                 <TiltedCard
                   imageSrc={profile?.photo_url || "/photos/tiltedcard.svg"}
@@ -428,20 +464,28 @@ export default function Home() {
             )}
           </div>
           
-          {/* Show/Hide Button untuk Projects */}
+          {/* Show/Hide Button untuk Projects dengan icon plus/minus */}
           {shouldShowProjectsButton && (
             <div className="flex justify-center mt-6">
-              <button
+              <button 
+                className="group cursor-pointer outline-none hover:rotate-90 duration-300" 
+                title={showAllProjects ? "Hide Projects" : "Show All Projects"}
                 onClick={() => setShowAllProjects(!showAllProjects)}
-                className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-6 py-3 rounded-lg font-bold text-sm uppercase tracking-wider transition-all duration-300 hover:from-blue-400 hover:to-cyan-400 hover:scale-105 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(6,182,212,0.4)] shadow-[0_0_10px_rgba(59,130,246,0.3)] border border-blue-400/30 backdrop-blur-sm"
-                style={{
-                  textShadow: '0 0 10px rgba(59,130,246,0.8)',
-                  boxShadow: '0 0 15px rgba(59,130,246,0.4), inset 0 1px 0 rgba(255,255,255,0.2)'
-                }}
-              >
-                <span className="relative z-10">
-                  {showAllProjects ? 'Hide Projects' : `Show All Projects (${projects.length})`}
-                </span>
+              > 
+                <svg 
+                  className="stroke-teal-500 fill-none group-hover:fill-teal-800 group-active:stroke-teal-200 group-active:fill-teal-600 group-active:duration-0 duration-300" 
+                  viewBox="0 0 24 24" 
+                  height="50px" 
+                  width="50px" 
+                  xmlns="http://www.w3.org/2000/svg"
+                > 
+                  <path 
+                    strokeWidth="1.5" 
+                    d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z" 
+                  ></path> 
+                  <path strokeWidth="1.5" d="M8 12H16"></path> 
+                  {!showAllProjects && <path strokeWidth="1.5" d="M12 16V8"></path>}
+                </svg> 
               </button>
             </div>
           )}
@@ -479,20 +523,28 @@ export default function Home() {
             )}
           </div>
           
-          {/* Show/Hide Button untuk Certificates */}
+          {/* Show/Hide Button untuk Certificates dengan icon plus/minus */}
           {shouldShowCertificatesButton && (
             <div className="flex justify-center mt-6">
-              <button
+              <button 
+                className="group cursor-pointer outline-none hover:rotate-90 duration-300" 
+                title={showAllCertificates ? "Hide Certificates" : "Show All Certificates"}
                 onClick={() => setShowAllCertificates(!showAllCertificates)}
-                className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-6 py-3 rounded-lg font-bold text-sm uppercase tracking-wider transition-all duration-300 hover:from-blue-400 hover:to-cyan-400 hover:scale-105 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(6,182,212,0.4)] shadow-[0_0_10px_rgba(59,130,246,0.3)] border border-blue-400/30 backdrop-blur-sm"
-                style={{
-                  textShadow: '0 0 10px rgba(59,130,246,0.8)',
-                  boxShadow: '0 0 15px rgba(59,130,246,0.4), inset 0 1px 0 rgba(255,255,255,0.2)'
-                }}
-              >
-                <span className="relative z-10">
-                  {showAllCertificates ? 'Hide Certificates' : `Show All Certificates (${certificates.length})`}
-                </span>
+              > 
+                <svg 
+                  className="stroke-teal-500 fill-none group-hover:fill-teal-800 group-active:stroke-teal-200 group-active:fill-teal-600 group-active:duration-0 duration-300" 
+                  viewBox="0 0 24 24" 
+                  height="50px" 
+                  width="50px" 
+                  xmlns="http://www.w3.org/2000/svg"
+                > 
+                  <path 
+                    strokeWidth="1.5" 
+                    d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12 C2 17.5 6.5 22 12 22Z" 
+                  ></path> 
+                  <path strokeWidth="1.5" d="M8 12H16"></path> 
+                  {!showAllCertificates && <path strokeWidth="1.5" d="M12 16V8"></path>}
+                </svg> 
               </button>
             </div>
           )}
