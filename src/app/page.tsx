@@ -4,6 +4,7 @@
 
 import React, { useEffect, useState } from "react"; // Removed useState
 import Image from "next/image"; // Keep Image for CircularText section
+import { motion } from "framer-motion"; // Import motion for smooth animations
 
 // Import your components and blocks
 // Removed GooeyNav import
@@ -319,27 +320,47 @@ export default function Home() {
                       const isInRow4OrBeyond = rowIndex >= 3;
                       const shouldHide = !showAllSkills && rowIndex >= 4; // Sembunyikan baris 5 dan seterusnya
                       const shouldBlur = !showAllSkills && rowIndex === 3; // Blur seluruh baris 4
+                      const isVisible = showAllSkills || rowIndex < 4; // Visible jika showAll atau di baris 1-4
                      
                      return (
-                       <div 
-                         key={index} 
-                         className={`bg-transparent border-2 border-white rounded-lg px-1 py-1 sm:px-2 sm:py-2 flex flex-col items-center justify-center text-center h-[60px] w-[60px] sm:h-[70px] sm:w-[70px] hover:bg-white/10 transition-all duration-300 hover:scale-105 shadow-lg ${shouldHide ? 'hidden' : ''} ${shouldBlur ? 'blur-sm opacity-60' : ''}`} 
-                         style={{boxShadow: 'inset 0 0 0 4px transparent, 0 0 0 4px rgba(0,0,0,0.8)'}}
+                       <motion.div
+                         key={index}
+                         initial={{ opacity: 0, y: 20, scale: 0.9, height: 0 }}
+                         animate={{ 
+                           opacity: isVisible ? (shouldBlur ? 0.6 : 1) : 0, 
+                           y: isVisible ? 0 : 20,
+                           scale: isVisible ? 1 : 0.9,
+                           height: isVisible ? 'auto' : 0
+                         }}
+                         transition={{ 
+                           duration: 0.3, 
+                           ease: "easeInOut",
+                           delay: isVisible ? index * 0.02 : (skillsFromCreate.length - index) * 0.02
+                         }}
+                         style={{ 
+                           overflow: 'hidden',
+                           pointerEvents: isVisible ? 'auto' : 'none'
+                         }}
                        >
-                         {skill.logo && (
-                           <div className="w-5 h-5 sm:w-6 sm:h-6 mb-1 sm:mb-2 flex items-center justify-center flex-shrink-0">
-                             <img 
-                               src={skill.logo} 
-                               alt={skill.name} 
-                               className="w-full h-full object-contain"
-                               onError={(e) => {
-                                 e.currentTarget.style.display = 'none';
-                               }}
-                             />
-                           </div>
-                         )}
-                         <span className="text-[10px] sm:text-xs text-gray-300 font-medium line-clamp-2 leading-tight text-center px-0.5">{skill.name}</span>
-                       </div>
+                         <div 
+                           className={`bg-transparent border-2 border-white rounded-lg px-1 py-1 sm:px-2 sm:py-2 flex flex-col items-center justify-center text-center h-[55px] w-[55px] sm:h-[65px] sm:w-[65px] hover:bg-white/10 transition-all duration-300 hover:scale-105 shadow-lg ${shouldBlur ? 'blur-sm' : ''}`} 
+                           style={{boxShadow: 'inset 0 0 0 4px transparent, 0 0 0 4px rgba(0,0,0,0.8)'}}
+                         >
+                           {skill.logo && (
+                             <div className="w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center flex-shrink-0 mb-0.5">
+                               <img 
+                                 src={skill.logo} 
+                                 alt={skill.name} 
+                                 className="w-full h-full object-contain"
+                                 onError={(e) => {
+                                   e.currentTarget.style.display = 'none';
+                                 }}
+                               />
+                             </div>
+                           )}
+                           <span className="text-[7px] sm:text-[9px] text-gray-300 font-medium leading-[1.1] text-center px-0.5 break-words hyphens-auto" style={{wordBreak: 'break-word', overflowWrap: 'break-word', fontSize: 'clamp(6px, 1.2vw, 9px)'}}>{skill.name}</span>
+                         </div>
+                       </motion.div>
                      );
                    })}
                  </div>
@@ -449,18 +470,40 @@ export default function Home() {
             {loading ? (
               <div className="col-span-3 text-center">Loading...</div>
             ) : (
-              displayedProjects.map((project, index) => (
-                <ProjectCard
-                  key={project.id}
-                  project={{
-                    ...project,
-                    imageSrc: project.image, // mapping ke prop ProjectCard
-                    number: (index + 1).toString().padStart(2, '0'), // jika butuh nomor urut
-                    techstack: [], // kosongkan atau fetch jika ada field di DB
-                  }}
-                  index={index}
-                />
-              ))
+              projects.map((project, index) => {
+                const isVisible = showAllProjects || index < 9;
+                return (
+                  <motion.div
+                    key={project.id}
+                    initial={{ opacity: 0, y: 20, scale: 0.9, height: 0 }}
+                    animate={{ 
+                      opacity: isVisible ? 1 : 0, 
+                      y: isVisible ? 0 : 20,
+                      scale: isVisible ? 1 : 0.9,
+                      height: isVisible ? 'auto' : 0
+                    }}
+                    transition={{ 
+                      duration: 0.3, 
+                      ease: "easeInOut",
+                      delay: isVisible ? index * 0.05 : (projects.length - index) * 0.05
+                    }}
+                    style={{ 
+                      overflow: 'hidden',
+                      pointerEvents: isVisible ? 'auto' : 'none'
+                    }}
+                  >
+                    <ProjectCard
+                      project={{
+                        ...project,
+                        imageSrc: project.image, // mapping ke prop ProjectCard
+                        number: (index + 1).toString().padStart(2, '0'), // jika butuh nomor urut
+                        techstack: [], // kosongkan atau fetch jika ada field di DB
+                      }}
+                      index={index}
+                    />
+                  </motion.div>
+                );
+              })
             )}
           </div>
           
@@ -509,17 +552,39 @@ export default function Home() {
             {loading ? (
               <div className="col-span-3 text-center">Loading...</div>
             ) : (
-              displayedCertificates.map((certificate, index) => (
-                <CertificateCard
-                  key={certificate.id}
-                  certificate={{
-                    ...certificate,
-                    imageSrc: certificate.image, // mapping ke prop CertificateCard
-                    number: (index + 1).toString().padStart(2, '0'), // jika butuh nomor urut
-                  }}
-                  index={index}
-                />
-              ))
+              certificates.map((certificate, index) => {
+                const isVisible = showAllCertificates || index < 9;
+                return (
+                  <motion.div
+                    key={certificate.id}
+                    initial={{ opacity: 0, y: 20, scale: 0.9, height: 0 }}
+                    animate={{ 
+                      opacity: isVisible ? 1 : 0, 
+                      y: isVisible ? 0 : 20,
+                      scale: isVisible ? 1 : 0.9,
+                      height: isVisible ? 'auto' : 0
+                    }}
+                    transition={{ 
+                      duration: 0.3, 
+                      ease: "easeInOut",
+                      delay: isVisible ? index * 0.05 : (certificates.length - index) * 0.05
+                    }}
+                    style={{ 
+                      overflow: 'hidden',
+                      pointerEvents: isVisible ? 'auto' : 'none'
+                    }}
+                  >
+                    <CertificateCard
+                      certificate={{
+                        ...certificate,
+                        imageSrc: certificate.image, // mapping ke prop CertificateCard
+                        number: (index + 1).toString().padStart(2, '0'), // jika butuh nomor urut
+                      }}
+                      index={index}
+                    />
+                  </motion.div>
+                );
+              })
             )}
           </div>
           

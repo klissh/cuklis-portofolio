@@ -75,8 +75,26 @@ const ProjectCard: React.FC<ProjectCardProps> = React.memo(({ project, index }) 
         <div className={`flex flex-col ${contentAlignmentClasses} ${textOrderClass} z-10 p-2 md:p-6`}>
             {/* Title and Category */}
             <div>
-              <h3 className="md:text-xl text-sm font-semibold text-white">{project.title}</h3>
-              <p className="md:text-sm text-xs text-gray-400 line-clamp-2">{project.description}</p>
+              <h3 
+                className="md:text-xl text-sm font-semibold text-white leading-tight break-words hyphens-auto"
+                style={{ 
+                  wordBreak: 'break-word', 
+                  overflowWrap: 'break-word',
+                  fontSize: 'clamp(10px, 2vw, 20px)'
+                }}
+              >
+                {project.title}
+              </h3>
+              <p 
+                className="md:text-sm text-xs text-gray-400 leading-tight break-words hyphens-auto mt-1"
+                style={{ 
+                  wordBreak: 'break-word', 
+                  overflowWrap: 'break-word',
+                  fontSize: 'clamp(8px, 1.5vw, 14px)'
+                }}
+              >
+                {project.description}
+              </p>
             </div>
             {/* Description */}
             <div className="mt-1 md:mt-2">

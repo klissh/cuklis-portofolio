@@ -73,7 +73,16 @@ const CertificateCard: React.FC<CertificateCardProps> = React.memo(({ certificat
         <div className={`flex flex-col ${contentAlignmentClasses} ${textOrderClass} z-10 p-2 md:p-6`}>
             {/* Title only */}
             <div>
-              <h3 className="md:text-xl text-sm font-semibold text-white line-clamp-2">{certificate.title}</h3>
+              <h3 
+                className="md:text-xl text-sm font-semibold text-white leading-tight break-words hyphens-auto"
+                style={{ 
+                  wordBreak: 'break-word', 
+                  overflowWrap: 'break-word',
+                  fontSize: 'clamp(10px, 2vw, 20px)'
+                }}
+              >
+                {certificate.title}
+              </h3>
             </div>
         </div>
 
