@@ -488,7 +488,7 @@ export default function Home() {
 
         {/* Projects Section Start */}
         <div className="w-full max-w-[1400px] mx-auto">
-          <div className="grid grid-cols-3 w-full mt-4 md:mt-10 gap-2 md:gap-4 pb-2">
+          <div className="grid grid-cols-3 w-full mt-4 md:mt-10 gap-2 md:gap-4 pb-4">
             {loading ? (
               <div className="col-span-3 text-center">Loading...</div>
             ) : (
@@ -497,17 +497,27 @@ export default function Home() {
                 return (
                   <motion.div
                     key={project.id}
-                    initial={{ opacity: 0, y: 20, scale: 0.9, height: 0 }}
+                    initial={{ opacity: 0, y: 20, scale: 0.9 }}
                     animate={{ 
                       opacity: isVisible ? 1 : 0, 
                       y: isVisible ? 0 : 20,
-                      scale: isVisible ? 1 : 0.9,
-                      height: isVisible ? 'auto' : 0
+                      scale: isVisible ? 1 : 0.95,
+                      height: isVisible ? 'auto' : 0,
+                      marginBottom: isVisible ? '0.5rem' : 0
+                    }}
+                    exit={{ 
+                      opacity: 0, 
+                      y: 20, 
+                      scale: 0.95,
+                      height: 0,
+                      marginBottom: 0
                     }}
                     transition={{ 
-                      duration: 0.3, 
-                      ease: "easeInOut",
-                      delay: isVisible ? index * 0.05 : (projects.length - index) * 0.05
+                      duration: 0.5, 
+                      ease: [0.4, 0.0, 0.2, 1],
+                      delay: isVisible ? index * 0.03 : (projects.length - index) * 0.02,
+                      height: { duration: 0.4, ease: "easeInOut" },
+                      opacity: { duration: 0.3, ease: "easeOut" }
                     }}
                     style={{ 
                       pointerEvents: isVisible ? 'auto' : 'none'
@@ -569,7 +579,7 @@ export default function Home() {
 
         {/* Certificates Section Start */}
         <div className="w-full max-w-[1400px] mx-auto">
-          <div className="grid grid-cols-3 w-full mt-4 md:mt-10 gap-2 md:gap-4 pb-2">
+          <div className="grid grid-cols-3 w-full mt-4 md:mt-10 gap-2 md:gap-4 pb-4">
             {loading ? (
               <div className="col-span-3 text-center">Loading...</div>
             ) : (
@@ -578,17 +588,27 @@ export default function Home() {
                 return (
                   <motion.div
                     key={certificate.id}
-                    initial={{ opacity: 0, y: 20, scale: 0.9, height: 0 }}
+                    initial={{ opacity: 0, y: 20, scale: 0.9 }}
                     animate={{ 
                       opacity: isVisible ? 1 : 0, 
                       y: isVisible ? 0 : 20,
-                      scale: isVisible ? 1 : 0.9,
-                      height: isVisible ? 'auto' : 0
+                      scale: isVisible ? 1 : 0.95,
+                      height: isVisible ? 'auto' : 0,
+                      marginBottom: isVisible ? '0.5rem' : 0
+                    }}
+                    exit={{ 
+                      opacity: 0, 
+                      y: 20, 
+                      scale: 0.95,
+                      height: 0,
+                      marginBottom: 0
                     }}
                     transition={{ 
-                      duration: 0.3, 
-                      ease: "easeInOut",
-                      delay: isVisible ? index * 0.05 : (certificates.length - index) * 0.05
+                      duration: 0.5, 
+                      ease: [0.4, 0.0, 0.2, 1],
+                      delay: isVisible ? index * 0.03 : (certificates.length - index) * 0.02,
+                      height: { duration: 0.4, ease: "easeInOut" },
+                      opacity: { duration: 0.3, ease: "easeOut" }
                     }}
                     style={{ 
                       pointerEvents: isVisible ? 'auto' : 'none'
