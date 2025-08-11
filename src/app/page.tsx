@@ -287,14 +287,36 @@ export default function Home() {
                   <a
                     href={profile.cv_url}
                     download
-                    className="relative bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-8 py-3 rounded-lg font-bold text-sm uppercase tracking-wider transition-all duration-300 hover:from-blue-400 hover:to-cyan-400 hover:scale-105 hover:shadow-[0_0_20px_rgba(59,130,246,0.6),0_0_40px_rgba(6,182,212,0.4)] shadow-[0_0_10px_rgba(59,130,246,0.3)] border border-blue-400/30 backdrop-blur-sm"
+                    className="download-cv-button text-xs sm:text-sm md:text-base uppercase font-bold tracking-wider sm:tracking-widest md:tracking-[0.3rem] py-2 px-4 sm:px-6 md:px-8 lg:px-10"
                     style={{
-                      textShadow: '0 0 10px rgba(59,130,246,0.8)',
-                      boxShadow: '0 0 15px rgba(59,130,246,0.4), inset 0 1px 0 rgba(255,255,255,0.2)'
+                      '--main-color': 'rgb(59, 130, 246)',
+                      '--main-bg-color': 'rgba(59, 130, 246, 0.36)',
+                      '--pattern-color': 'rgba(59, 130, 246, 0.073)',
+                      filter: 'hue-rotate(0deg)',
+                      cursor: 'pointer',
+                      background: `radial-gradient(circle, var(--main-bg-color) 0%, rgba(0, 0, 0, 0) 95%), linear-gradient(var(--pattern-color) 1px, transparent 1px), linear-gradient(to right, var(--pattern-color) 1px, transparent 1px)`,
+                      backgroundSize: 'cover, 10px 10px, 10px 10px',
+                      backgroundPosition: 'center center, center center, center center',
+                      borderImage: 'radial-gradient(circle, var(--main-color) 0%, rgba(0, 0, 0, 0) 100%) 1',
+                      borderWidth: '1px 0 1px 0',
+                      color: 'var(--main-color)',
+                      transition: 'background-size 0.2s ease-in-out',
+                      textDecoration: 'none'
+                    } as React.CSSProperties}
+                    onMouseEnter={(e) => {
+                       e.currentTarget.style.backgroundSize = 'cover, 8px 8px, 8px 8px';
+                     }}
+                     onMouseLeave={(e) => {
+                       e.currentTarget.style.backgroundSize = 'cover, 10px 10px, 10px 10px';
+                     }}
+                    onMouseDown={(e) => {
+                      e.currentTarget.style.filter = 'hue-rotate(250deg)';
+                    }}
+                    onMouseUp={(e) => {
+                      e.currentTarget.style.filter = 'hue-rotate(0deg)';
                     }}
                   >
-                    <span className="relative z-10">Download CV</span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-cyan-600/20 rounded-lg blur-sm"></div>
+                    Download CV
                   </a>
                 </div>
               )}
@@ -343,7 +365,7 @@ export default function Home() {
                          }}
                        >
                          <div 
-                           className={`bg-transparent border-2 border-white rounded-lg px-1 py-1 sm:px-2 sm:py-2 flex flex-col items-center justify-center text-center h-[55px] w-[55px] sm:h-[65px] sm:w-[65px] hover:bg-white/10 transition-all duration-300 hover:scale-105 shadow-lg ${shouldBlur ? 'blur-sm' : ''}`} 
+                           className={`bg-transparent border-2 border-white rounded-lg px-1 py-1 sm:px-2 sm:py-2 flex flex-col items-center justify-center text-center h-[55px] w-[55px] sm:h-[65px] sm:w-[70px] hover:bg-white/10 transition-all duration-300 hover:scale-105 shadow-lg ${shouldBlur ? 'blur-sm' : ''}`} 
                            style={{boxShadow: 'inset 0 0 0 4px transparent, 0 0 0 4px rgba(0,0,0,0.8)'}}
                          >
                            {skill.logo && (
@@ -466,7 +488,7 @@ export default function Home() {
 
         {/* Projects Section Start */}
         <div className="w-full max-w-[1400px] mx-auto">
-          <div className="grid grid-cols-3 w-full mt-4 md:mt-10 gap-2 md:gap-4">
+          <div className="grid grid-cols-3 w-full mt-4 md:mt-10 gap-2 md:gap-4 pb-2">
             {loading ? (
               <div className="col-span-3 text-center">Loading...</div>
             ) : (
@@ -488,7 +510,6 @@ export default function Home() {
                       delay: isVisible ? index * 0.05 : (projects.length - index) * 0.05
                     }}
                     style={{ 
-                      overflow: 'hidden',
                       pointerEvents: isVisible ? 'auto' : 'none'
                     }}
                   >
@@ -548,7 +569,7 @@ export default function Home() {
 
         {/* Certificates Section Start */}
         <div className="w-full max-w-[1400px] mx-auto">
-          <div className="grid grid-cols-3 w-full mt-4 md:mt-10 gap-2 md:gap-4">
+          <div className="grid grid-cols-3 w-full mt-4 md:mt-10 gap-2 md:gap-4 pb-2">
             {loading ? (
               <div className="col-span-3 text-center">Loading...</div>
             ) : (
@@ -570,7 +591,6 @@ export default function Home() {
                       delay: isVisible ? index * 0.05 : (certificates.length - index) * 0.05
                     }}
                     style={{ 
-                      overflow: 'hidden',
                       pointerEvents: isVisible ? 'auto' : 'none'
                     }}
                   >
@@ -619,8 +639,8 @@ export default function Home() {
 
 
       {/* Footer Section - Consider moving this to layout.tsx as well for consistency */}
-      <footer className="flex w-full items-center justify-center p-4 border-t border-white/[.15] text-white/50 text-sm font-light mt-20"> {/* Added margin top */}
-        <p>&copy; {new Date().getFullYear()} Muhammad Muhibuddin Mukhlish. All rights reserved.</p> {/* Updated name */}
+      <footer className="flex w-full items-center justify-center px-2 py-3 md:p-4 border-t border-white/[.15] text-white/50 text-xs sm:text-sm font-light mt-20"> {/* Added margin top */}
+        <p className="text-center leading-tight">&copy; {new Date().getFullYear()} Muhammad Muhibuddin Mukhlish. All rights reserved.</p> {/* Updated name */}
       </footer>
     </> // Closed React Fragment wrapper
     // </div> // Removed this closing tag

@@ -62,7 +62,7 @@ const CertificateCard: React.FC<CertificateCardProps> = React.memo(({ certificat
     // Use flex-col to stack content vertically, justify-between to space text and image
     // Removed aspect-square to allow height to be determined by content
     <motion.div
-      className="relative flex flex-col justify-between py-3 md:py-6 px-2 md:px-15 md:m-0 m-1 border border-white border-opacity-20 bg-transparent overflow-hidden h-full"
+      className="relative flex flex-col justify-between py-3 md:py-6 px-2 md:px-15 md:m-0 m-1 border border-white border-opacity-20 bg-transparent h-full"
       // Optional: Add Framer Motion initial/animate/whileHover props here (for the whole card)
       // For example: initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
     >
