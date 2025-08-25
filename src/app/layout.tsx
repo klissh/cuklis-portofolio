@@ -27,7 +27,7 @@ const items = [
 // Define social media links and placeholder icon paths
 const socialLinks = [
   { platform: "GitHub", href: "https://github.com/klissh", iconPath: "/icons/github_icon.svg" }, // <-- Replace YOUR_GITHUB_LINK and icon path
-  { platform: "LinkedIn", href: "https://www.linkedin.com/in/muhammad-muhibuddin-mukhlish-889a5a1a5/", iconPath: "/icons/linkedin_icon.svg" }, // <-- Replace YOUR_LINKEDIN_LINK and icon path
+  { platform: "LinkedIn", href: "https://www.linkedin.com/in/muhammad-muhibuddin-mukhlish/", iconPath: "/icons/linkedin_icon.svg" }, // <-- Replace YOUR_LINKEDIN_LINK and icon path
   { platform: "Gmail", href: "mailto:muhammad.muhibuddin.mukhlish@gmail.com", iconPath: "/icons/gmail_icon.svg" }, // <-- Replace YOUR_EMAIL_ADDRESS and icon path
 ];
 
