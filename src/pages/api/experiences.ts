@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { supabase } from '@/utils/supabaseClient';
+import { verifySessionToken } from '@/utils/adminAuth';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
@@ -13,6 +14,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   if (req.method === 'POST') {
+    // Membuat pengalaman baru — khusus admin.
+    // SEBELUMNYA tidak ada pengecekan auth sama sekali di sini.
+    if (!verifySessionToken(req.cookies.admin_session)) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
     const { title, description, date_start, date_end, company, link, image, order } = req.body;
     const { data, error } = await supabase
       .from('experiences')
@@ -23,4 +30,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   res.setHeader('Allow', ['GET', 'POST']);
   res.status(405).end(`Method ${req.method} Not Allowed`);
-} 
+}

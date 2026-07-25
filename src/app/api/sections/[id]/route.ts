@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { supabase } from '@/utils/supabaseClient';
+import { verifySessionToken } from '@/utils/adminAuth';
 
 export async function PUT(
   request: NextRequest,
@@ -10,7 +11,7 @@ export async function PUT(
     // Pengecekan autentikasi admin
     const cookieStore = await cookies();
     const session = cookieStore.get('admin_session');
-    if (!session || !session.value) {
+    if (!verifySessionToken(session?.value)) {
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
@@ -54,7 +55,7 @@ export async function DELETE(
     // Pengecekan autentikasi admin
     const cookieStore = await cookies();
     const session = cookieStore.get('admin_session');
-    if (!session || !session.value) {
+    if (!verifySessionToken(session?.value)) {
       return new NextResponse('Unauthorized', { status: 401 });
     }
 

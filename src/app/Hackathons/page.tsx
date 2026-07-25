@@ -20,7 +20,7 @@ const hackathonEntriesData = [
     title: "Procrash",
     award: "3rd Place",
     description: "Designed for procrastinators and anyone striving for self-improvement, this gamified app transforms productivity into an adventure. By setting ultimate goals, breaking them into small missions, and battling monsters with each completed task, users can build better habits one level at a time.",
-    imageSrc: '/solutions/procrash.svg', // Replace with the actual image path
+    imageSrc: '/solutions/procrash.webp', // Replace with the actual image path
     projectLink: "https://procrash-hdps5h.flutterflow.app/?fbclid=IwZXh0bgNhZW0CMTEAAR6V1DkZeKy8dZetXVGOk7A33bbXy5Ue001oiPqO8CxLwXM40uhn5cdDCW9RUQ_aem_cvDKSgLmGXTzEsuIRtzhrw", // <-- Add the link for Procrash
     trophyType: "third", // Specify the trophy type
     techStackIcons: [ // <-- Add paths to tech stack icons for Procrash
@@ -33,7 +33,7 @@ const hackathonEntriesData = [
     title: "Talento",
     award: "Special Award",
     description: "Talento is a mobile app designed to help you visually showcase your talents and skills through videos and images. It's like a \"Tinder for jobs,\" allowing you to immediately grab the attention of HR professionals with your abilities, making your application unmissable.",
-    imageSrc: '/solutions/talento.svg', // Replace with the actual image path
+    imageSrc: '/solutions/talento.webp', // Replace with the actual image path
     projectLink: "https://talento-xi.vercel.app/", // <-- Add the link for Talento
     trophyType: "special", // Specify the trophy type
     techStackIcons: [ // <-- Add paths to tech stack icons for Talento
@@ -46,7 +46,7 @@ const hackathonEntriesData = [
     title: "KachingKo",
     award: "4th Place",
     description: "Scan your receipts, unlock financial intelligence. This AI companion uses videos or images of receipts to categorize spending, analyze habits, guide your budget towards goals, and reward smart money decisions. KachingKo makes understanding your finances instant and engaging.",
-    imageSrc: '/solutions/kachingko.svg', // Replace with the actual image path
+    imageSrc: '/solutions/kachingko.webp', // Replace with the actual image path
     projectLink: "https://neosolve-hackit-kachingko.vercel.app/", // <-- Add the link for KachingKo
     trophyType: "participant", // Specify the trophy type (using participant as a placeholder for 4th)
     techStackIcons: [ // <-- Add paths to tech stack icons for KachingKo
@@ -60,7 +60,7 @@ const hackathonEntriesData = [
     title: "eCarga",
     award: "Finalist - 1st Place Mock Pitch",
     description: "A mobile app for booking specialized, accessible vehicles, created to cater to individuals with mobility disabilities. It serves as a direct link, connecting users in need of adapted transport (like wheelchair users) with suitable vehicles, providing convenient pickup service rather than requiring travel to a terminal.",
-    imageSrc: '/solutions/ecarga.svg', // Replace with the actual image path
+    imageSrc: '/solutions/ecarga.webp', // Replace with the actual image path
     projectLink: "https://github.com/Feinpoint/eCarga", // <-- Add the link for eCarga
     trophyType: "first", // Specify the trophy type
      techStackIcons: [ // <-- Add paths to tech stack icons for eCarga
@@ -73,7 +73,7 @@ const hackathonEntriesData = [
     title: "Neosolutions",
     award: "Top 5 Finalist",
     description: "A CRM powered by Generative AI that transforms customer service by automatically detecting and processing conversations using NLP. It streamlines interactions, providing one-click access to relevant documentation and replies. Plus, it offers automated Kanban tracking for tickets and simulates AI resolution for low-level concerns.",
-    imageSrc: '/solutions/neosolutions.svg', // Replace with the actual image path
+    imageSrc: '/solutions/neosolutions.webp', // Replace with the actual image path
     projectLink: "https://neosolutions-tenext-ai.vercel.app/", // <-- Add the link for Neosolutions
     trophyType: "participant", // Specify the trophy type (using participant as a placeholder for Top 5)
     techStackIcons: [ // <-- Add paths to tech stack icons for Neosolutions

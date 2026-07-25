@@ -1,6 +1,7 @@
 // src/pages/api/projects.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { supabase } from '@/utils/supabaseClient';
+import { verifySessionToken } from '@/utils/adminAuth';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
@@ -11,7 +12,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   if (req.method === 'POST') {
-    // Create new project
+    // Membuat project baru — khusus admin.
+    // SEBELUMNYA endpoint ini tidak punya pengecekan auth sama sekali,
+    // sehingga siapa pun bisa menambahkan project ke database.
+    if (!verifySessionToken(req.cookies.admin_session)) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
     const { title, description, image, link } = req.body;
     const { data, error } = await supabase.from('projects').insert([{ title, description, image, link }]);
     if (error) return res.status(500).json({ error: error.message });

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { supabase } from '@/utils/supabaseClient';
+import { verifySessionToken } from '@/utils/adminAuth';
 
 export async function GET() {
   try {
@@ -22,6 +24,15 @@ export async function GET() {
 
 export async function PUT(request: NextRequest) {
   try {
+    // Pengecekan autentikasi admin.
+    // SEBELUMNYA endpoint ini tidak punya proteksi apa pun, artinya siapa
+    // saja di internet bisa menimpa nama, bio, CV, dan foto profil.
+    const cookieStore = await cookies();
+    const session = cookieStore.get('admin_session');
+    if (!verifySessionToken(session?.value)) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+
     const body = await request.json();
     const { name, bio, description, titles, cv_url, photo_url } = body;
 

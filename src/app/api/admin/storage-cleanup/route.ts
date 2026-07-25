@@ -1,27 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { cleanupUnusedFiles, cleanupOldUnusedFiles } from '@/utils/storageCleanup';
-
-// Fungsi untuk memvalidasi session admin
-async function validateAdminSession(request: NextRequest) {
-  try {
-    const sessionRes = await fetch(`${request.nextUrl.origin}/api/admin-session`, {
-      headers: {
-        cookie: request.headers.get('cookie') || ''
-      }
-    });
-    return sessionRes.ok;
-  } catch (error) {
-    console.error('Error validating admin session:', error);
-    return false;
-  }
-}
+import { verifySessionToken } from '@/utils/adminAuth';
 
 // API untuk membersihkan file yang tidak digunakan (khusus admin dashboard)
 export async function POST(request: NextRequest) {
   try {
-    // Validasi session admin
-    const isValidSession = await validateAdminSession(request);
-    if (!isValidSession) {
+    // Validasi session admin langsung dari cookie (sebelumnya melakukan
+    // self-fetch ke /api/admin-session yang tidak perlu dan lebih rapuh)
+    const cookieStore = await cookies();
+    const session = cookieStore.get('admin_session');
+    if (!verifySessionToken(session?.value)) {
       return NextResponse.json(
         { error: 'Unauthorized: Admin session required' },
         { status: 401 }
@@ -32,7 +21,7 @@ export async function POST(request: NextRequest) {
     const { mode = 'unused', daysOld = 30 } = body;
 
     let result;
-    
+
     if (mode === 'old') {
       // Hapus file lama yang tidak digunakan (lebih dari X hari)
       result = await cleanupOldUnusedFiles(daysOld);

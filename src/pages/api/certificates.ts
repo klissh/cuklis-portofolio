@@ -1,6 +1,7 @@
 // src/pages/api/certificates.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { supabase } from '@/utils/supabaseClient';
+import { verifySessionToken } from '@/utils/adminAuth';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
@@ -11,7 +12,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   if (req.method === 'POST') {
-    // Create new certificate
+    // Membuat sertifikat baru — khusus admin.
+    // SEBELUMNYA tidak ada pengecekan auth sama sekali di sini.
+    if (!verifySessionToken(req.cookies.admin_session)) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
     const { title, image, link } = req.body;
     const { data, error } = await supabase.from('certificates').insert([{ title, image, link }]);
     if (error) return res.status(500).json({ error: error.message });
