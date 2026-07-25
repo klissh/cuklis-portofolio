@@ -110,6 +110,8 @@ export default function AdminPage() {
   const [expForm, setExpForm] = useState<Partial<Experience>>({});
   const [editExpId, setEditExpId] = useState<number | null>(null);
   const [expLoading, setExpLoading] = useState(false);
+  const [experienceSearch, setExperienceSearch] = useState("");
+  const [experiencePage, setExperiencePage] = useState(1);
 
   // Profile state
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -781,6 +783,21 @@ export default function AdminPage() {
   // state React, jadi filter dan pagination cukup dihitung ulang di sini
   // setiap render tanpa perlu request tambahan ke server.
 
+  const filteredExperiences = experiences.filter((exp) => {
+    const q = experienceSearch.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      exp.title?.toLowerCase().includes(q) ||
+      exp.company?.toLowerCase().includes(q) ||
+      exp.description?.toLowerCase().includes(q)
+    );
+  });
+  const experienceTotalPages = Math.max(1, Math.ceil(filteredExperiences.length / ADMIN_PAGE_SIZE));
+  const paginatedExperiences = filteredExperiences.slice(
+    (experiencePage - 1) * ADMIN_PAGE_SIZE,
+    experiencePage * ADMIN_PAGE_SIZE
+  );
+
   const filteredProjects = projects.filter((p) => {
     const q = projectSearch.trim().toLowerCase();
     if (!q) return true;
@@ -827,6 +844,9 @@ export default function AdminPage() {
   useEffect(() => {
     if (projectPage > projectTotalPages) setProjectPage(projectTotalPages);
   }, [projectPage, projectTotalPages]);
+  useEffect(() => {
+    if (experiencePage > experienceTotalPages) setExperiencePage(experienceTotalPages);
+  }, [experiencePage, experienceTotalPages]);
   useEffect(() => {
     if (certificatePage > certificateTotalPages) setCertificatePage(certificateTotalPages);
   }, [certificatePage, certificateTotalPages]);
@@ -1322,10 +1342,27 @@ export default function AdminPage() {
                     + Tambah Experience
                   </button>
                 </div>
+                <div className="mb-4 flex flex-col sm:flex-row sm:items-center gap-2">
+                  <SearchBar
+                    value={experienceSearch}
+                    onChange={(v) => {
+                      setExperienceSearch(v);
+                      setExperiencePage(1);
+                    }}
+                    placeholder="Cari berdasarkan title, company, atau deskripsi..."
+                  />
+                  {experienceSearch && (
+                    <p className="text-xs text-gray-500 italic">
+                      Tombol urutan (▲▼) dinonaktifkan sementara saat pencarian aktif -- hapus pencarian untuk mengubah urutan.
+                    </p>
+                  )}
+                </div>
                 {expLoading ? (
                   <div className="py-8 text-center text-blue-700 font-semibold">Loading...</div>
-                ) : experiences.length === 0 ? (
-                  <div className="py-8 text-center text-gray-400 font-semibold">Belum ada experience.</div>
+                ) : filteredExperiences.length === 0 ? (
+                  <div className="py-8 text-center text-gray-400 font-semibold">
+                    {experienceSearch ? "Tidak ada experience yang cocok dengan pencarian." : "Belum ada experience."}
+                  </div>
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm border border-blue-200 rounded-lg overflow-hidden">
@@ -1342,13 +1379,20 @@ export default function AdminPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {experiences.map((exp, i) => (
+                        {paginatedExperiences.map((exp) => {
+                          // Tombol ▲▼ menukar 'order' dengan tetangga di data LENGKAP
+                          // (experiences, sudah terurut oleh 'order' dari API), bukan
+                          // dengan tetangga di tampilan yang sedang difilter/dipaginasi.
+                          // Ini penting supaya urutan yang berubah tetap benar walau
+                          // sedang mencari atau berada di halaman lain.
+                          const trueIndex = experiences.findIndex((e) => e.id === exp.id);
+                          const isFirst = trueIndex <= 0;
+                          const isLast = trueIndex === experiences.length - 1;
+                          const reorderDisabled = experienceSearch.trim() !== "";
+                          return (
                           <tr
                             key={exp.id}
-                            className={
-                              (i % 2 === 0 ? "bg-white" : "bg-blue-50") +
-                              " border-b border-blue-200 hover:bg-blue-100 transition"
-                            }
+                            className="border-b border-blue-200 hover:bg-blue-100 transition odd:bg-white even:bg-blue-50"
                           >
                             <td className="p-2 px-3 font-semibold text-blue-900 align-middle text-sm">{exp.title}</td>
                             <td className="p-2 px-3 text-blue-800 align-middle text-sm">{exp.company || '-'}</td>
@@ -1377,11 +1421,11 @@ export default function AdminPage() {
                               <div className="flex items-center justify-center space-x-1">
                                 {/* Tombol Naik */}
                                 <button
-                                  className="bg-gray-300 hover:bg-gray-400 text-blue-900 px-1 py-1 rounded text-xs"
-                                  disabled={i === 0}
+                                  className="bg-gray-300 hover:bg-gray-400 text-blue-900 px-1 py-1 rounded text-xs disabled:opacity-40 disabled:cursor-not-allowed"
+                                  disabled={isFirst || reorderDisabled}
                                   onClick={async () => {
-                                    if (i === 0) return;
-                                    const above = experiences[i - 1];
+                                    if (isFirst || reorderDisabled) return;
+                                    const above = experiences[trueIndex - 1];
                                     // Tukar order
                                     await fetch(`/api/experiences/${exp.id}`, {
                                       method: 'PUT',
@@ -1395,17 +1439,17 @@ export default function AdminPage() {
                                     });
                                     fetchExperiences();
                                   }}
-                                  title="Naik"
+                                  title={reorderDisabled ? "Hapus pencarian untuk mengubah urutan" : "Naik"}
                                 >
                                   ▲
                                 </button>
                                 {/* Tombol Turun */}
                                 <button
-                                  className="bg-gray-300 hover:bg-gray-400 text-blue-900 px-1 py-1 rounded text-xs"
-                                  disabled={i === experiences.length - 1}
+                                  className="bg-gray-300 hover:bg-gray-400 text-blue-900 px-1 py-1 rounded text-xs disabled:opacity-40 disabled:cursor-not-allowed"
+                                  disabled={isLast || reorderDisabled}
                                   onClick={async () => {
-                                    if (i === experiences.length - 1) return;
-                                    const below = experiences[i + 1];
+                                    if (isLast || reorderDisabled) return;
+                                    const below = experiences[trueIndex + 1];
                                     // Tukar order
                                     await fetch(`/api/experiences/${exp.id}`, {
                                       method: 'PUT',
@@ -1419,7 +1463,7 @@ export default function AdminPage() {
                                     });
                                     fetchExperiences();
                                   }}
-                                  title="Turun"
+                                  title={reorderDisabled ? "Hapus pencarian untuk mengubah urutan" : "Turun"}
                                 >
                                   ▼
                                 </button>
@@ -1447,9 +1491,16 @@ export default function AdminPage() {
                               </div>
                             </td>
                           </tr>
-                        ))}
+                          );
+                        })}
                       </tbody>
                     </table>
+                    <Pagination
+                      currentPage={experiencePage}
+                      totalItems={filteredExperiences.length}
+                      pageSize={ADMIN_PAGE_SIZE}
+                      onPageChange={setExperiencePage}
+                    />
                   </div>
                 )}
 
