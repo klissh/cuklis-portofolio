@@ -2,9 +2,18 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { supabase } from '@/utils/supabaseClient';
 import { cleanupUnusedFiles } from '@/utils/storageCleanup';
+import { verifySessionToken } from '@/utils/adminAuth';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query;
+
+  // Update dan delete khusus admin. SEBELUMNYA tidak ada pengecekan auth
+  // sama sekali, sehingga siapa pun bisa mengubah atau menghapus project.
+  if (req.method === 'PUT' || req.method === 'DELETE') {
+    if (!verifySessionToken(req.cookies.admin_session)) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+  }
 
   if (req.method === 'PUT') {
     const { title, description, image, link } = req.body;
@@ -19,7 +28,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method === 'DELETE') {
     const { error } = await supabase.from('projects').delete().eq('id', id);
     if (error) return res.status(500).json({ error: error.message });
-    
+
     // Jalankan cleanup otomatis setelah delete
     try {
       await cleanupUnusedFiles();
@@ -28,7 +37,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.error('Error during storage cleanup:', cleanupError);
       // Tidak mengembalikan error karena delete sudah berhasil
     }
-    
+
     return res.status(204).end();
   }
 

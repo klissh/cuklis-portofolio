@@ -2,26 +2,27 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import fs from 'fs';
 import path from 'path';
+import { createSessionToken, timingSafeStringEqual } from '@/utils/adminAuth';
 
 // Rate limit memory (per IP)
 const rateLimitMap = new Map<string, { count: number, last: number }>();
 const RATE_LIMIT = 5; // max 5 attempts
 const RATE_WINDOW = 10 * 60 * 1000; // 10 menit
 
-function generateSessionToken() {
-  return Math.random().toString(36).slice(2) + Date.now().toString(36);
-}
-
 function isValidInput(str: any) {
   return typeof str === 'string' && str.length >= 3 && str.length <= 64;
 }
 
 function logLoginAttempt(username: string, ip: string, status: 'success' | 'fail') {
+  // Di lingkungan production (Vercel/serverless) filesystem bersifat read-only
+  // dan sementara (ephemeral), jadi logging ke file hanya dilakukan di luar
+  // production untuk menghindari error yang tidak perlu.
+  if (process.env.NODE_ENV === 'production') return;
   const logPath = path.join(process.cwd(), 'logins.log');
   const logLine = `${new Date().toISOString()} | user: ${username} | ip: ${ip} | status: ${status}\n`;
   try {
     fs.appendFileSync(logPath, logLine);
-  } catch (e) {
+  } catch {
     // ignore logging error
   }
 }
@@ -51,18 +52,21 @@ export async function POST(req: NextRequest) {
   const ADMIN_USER = process.env.ADMIN_USER;
   const ADMIN_PASS = process.env.ADMIN_PASS;
 
-  if (
-    username === ADMIN_USER &&
-    password === ADMIN_PASS
-  ) {
-    const sessionToken = generateSessionToken();
+  const credentialsValid =
+    !!ADMIN_USER &&
+    !!ADMIN_PASS &&
+    timingSafeStringEqual(username, ADMIN_USER) &&
+    timingSafeStringEqual(password, ADMIN_PASS);
+
+  if (credentialsValid) {
+    const sessionToken = createSessionToken();
     const cookieStore = await cookies();
     cookieStore.set('admin_session', sessionToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       path: '/',
-      maxAge: 60 * 60, // 1 jam
+      maxAge: 60 * 60, // 1 jam, selaras dengan masa berlaku token
     });
     logLoginAttempt(username, ip, 'success');
     return NextResponse.json({ success: true });
@@ -74,4 +78,4 @@ export async function POST(req: NextRequest) {
 
 // CATATAN SQL INJECTION PROTECTION:
 // Jika menggunakan query SQL manual, SELALU gunakan parameterized query atau ORM (Supabase, Prisma, dsb).
-// Jangan pernah interpolasi string secara langsung ke query SQL! 
+// Jangan pernah interpolasi string secara langsung ke query SQL!
