@@ -67,92 +67,79 @@ const ExperienceTimeline: React.FC = () => {
 
 
       <div className="relative space-y-24">
-        {experiences.map((exp, index) => (
-          // Changed grid to 2 columns, removed the 'auto' middle column
-          <div key={exp.id} className="relative grid grid-cols-1 md:grid-cols-2 items-start gap-x-20 bg-black rounded-2xl p-6 shadow-lg md:bg-transparent">
-            {/* Side 1: Title, Company, Year, Logo - Conditional Alignment */}
-            {exp.link ? (
-              <a
-                href={exp.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`flex flex-col ${index % 2 === 0 ? 'md:items-end md:text-right' : 'md:items-start md:text-left'} ${index % 2 === 0 ? 'md:order-1' : 'md:order-2'} group cursor-pointer`}
-                style={{ textDecoration: 'none', color: 'inherit' }}
-              >
-                <h3 className="md:text-2xl text-xl font-bold text-gray-100 group-hover:text-cyan-200 transition">{exp.title}</h3>
-                {exp.company && (
-                  <span className="text-lg text-cyan-400 mb-1 block group-hover:text-cyan-300 transition">{exp.company}</span>
-                )}
-                {/* Date Range */}
-                <span
-                  className="md:text-xl text-md font-regular text-gray-400 mb-2"
-                  style={{ letterSpacing: '0.1em' }}
-                >
-                  {exp.date_start ?
-                    new Date(exp.date_start + '-01').toLocaleString('id-ID', { month: 'long', year: 'numeric' }) : ''
-                  }
-                  {exp.date_end ?
-                    ' - ' + new Date(exp.date_end + '-01').toLocaleString('id-ID', { month: 'long', year: 'numeric' }) :
-                    ' - Present'}
-                </span>
-                {/* Logo */}
-                {exp.logo && exp.logo.trim() !== "" ? (
-                  <div className="w-10 h-10 relative flex items-center justify-center md:my-0 my-5">
-                    <Image
-                      src={exp.logo}
-                      alt={`${exp.company} logo`}
-                      fill
-                      style={{ objectFit: 'contain' }}
-                      unoptimized
-                    />
-                  </div>
-                ) : null}
-                {typeof exp.image === "string" && exp.image.trim() && !/\/\/experience-images\//.test(exp.image) ? (
-                  <Image src={exp.image} alt="Experience" className="w-16 h-16 object-cover rounded" width={64} height={64} />
-                ) : null}
-              </a>
-            ) : (
-              <div className={`flex flex-col ${index % 2 === 0 ? 'md:items-end md:text-right' : 'md:items-start md:text-left'} ${index % 2 === 0 ? 'md:order-1' : 'md:order-2'}`}>
-                <h3 className="md:text-2xl text-xl font-bold text-gray-100">{exp.title}</h3>
-                {exp.company && (
-                  <span className="text-lg text-cyan-400 mb-1 block">{exp.company}</span>
-                )}
-                {/* Date Range */}
-                <span
-                  className="md:text-xl text-md font-regular text-gray-400 mb-2"
-                  style={{ letterSpacing: '0.1em' }}
-                >
-                  {exp.date_start ?
-                    new Date(exp.date_start + '-01').toLocaleString('id-ID', { month: 'long', year: 'numeric' }) : ''
-                  }
-                  {exp.date_end ?
-                    ' - ' + new Date(exp.date_end + '-01').toLocaleString('id-ID', { month: 'long', year: 'numeric' }) :
-                    ' - Present'}
-                </span>
-                {/* Logo */}
-                {exp.logo && exp.logo.trim() !== "" ? (
-                  <div className="w-10 h-10 relative flex items-center justify-center md:my-0 my-5">
-                    <Image
-                      src={exp.logo}
-                      alt={`${exp.company} logo`}
-                      fill
-                      style={{ objectFit: 'contain' }}
-                      unoptimized
-                    />
-                  </div>
-                ) : null}
-                {typeof exp.image === "string" && exp.image.trim() && !/\/\/experience-images\//.test(exp.image) ? (
-                  <Image src={exp.image} alt="Experience" className="w-16 h-16 object-cover rounded" width={64} height={64} />
-                ) : null}
-              </div>
-            )}
+        {experiences.map((exp, index) => {
+          const dateRange = (
+            <span
+              className="md:text-xl text-md font-regular text-gray-400 mb-2"
+              style={{ letterSpacing: '0.1em' }}
+            >
+              {exp.date_start ?
+                new Date(exp.date_start + '-01').toLocaleString('id-ID', { month: 'long', year: 'numeric' }) : ''
+              }
+              {exp.date_end ?
+                ' - ' + new Date(exp.date_end + '-01').toLocaleString('id-ID', { month: 'long', year: 'numeric' }) :
+                ' - Present'}
+            </span>
+          );
 
-            {/* Side 2: Description - Conditional Alignment */}
-            <div className={`text-gray-300 md:text-lg text:md ${index % 2 !== 0 ? 'md:text-right' : 'text-left'} ${index % 2 === 0 ? 'md:order-2' : 'md:order-1'}`}>
-              <p>{exp.description}</p>
-            </div>
-          </div>
-        ))}
+          const logoAndImage = (
+            <>
+              {exp.logo && exp.logo.trim() !== "" ? (
+                <div className="w-10 h-10 relative flex items-center justify-center md:my-0 my-5">
+                  <Image
+                    src={exp.logo}
+                    alt={`${exp.company} logo`}
+                    fill
+                    style={{ objectFit: 'contain' }}
+                    unoptimized
+                  />
+                </div>
+              ) : null}
+              {typeof exp.image === "string" && exp.image.trim() && !/\/\/experience-images\//.test(exp.image) ? (
+                <Image src={exp.image} alt="Experience" className="w-16 h-16 object-cover rounded" width={64} height={64} />
+              ) : null}
+            </>
+          );
+
+          // Seluruh kartu (kolom title/logo MAUPUN kolom deskripsi) dibungkus
+          // satu link yang sama ketika exp.link tersedia -- sebelumnya hanya
+          // kolom title/logo yang bisa diklik, kolom deskripsi tidak pernah
+          // ikut jadi bagian link sama sekali.
+          const CardTag = exp.link ? 'a' : 'div';
+          const cardLinkProps = exp.link
+            ? {
+                href: exp.link,
+                target: '_blank',
+                rel: 'noopener noreferrer',
+                style: { textDecoration: 'none', color: 'inherit' } as React.CSSProperties,
+              }
+            : {};
+
+          return (
+            <CardTag
+              key={exp.id}
+              {...cardLinkProps}
+              className={`relative grid grid-cols-1 md:grid-cols-2 items-start gap-x-20 bg-black rounded-2xl p-6 shadow-lg md:bg-transparent${
+                exp.link ? ' group cursor-pointer transition-colors duration-300 hover:bg-white/5 md:hover:bg-transparent' : ''
+              }`}
+            >
+              {/* Side 1: Title, Company, Year, Logo - Conditional Alignment */}
+              <div className={`flex flex-col ${index % 2 === 0 ? 'md:items-end md:text-right' : 'md:items-start md:text-left'} ${index % 2 === 0 ? 'md:order-1' : 'md:order-2'}`}>
+                <h3 className={`md:text-2xl text-xl font-bold text-gray-100${exp.link ? ' group-hover:text-cyan-200 transition' : ''}`}>{exp.title}</h3>
+                {exp.company && (
+                  <span className={`text-lg text-cyan-400 mb-1 block${exp.link ? ' group-hover:text-cyan-300 transition' : ''}`}>{exp.company}</span>
+                )}
+                {dateRange}
+                {logoAndImage}
+              </div>
+
+              {/* Side 2: Description - Conditional Alignment */}
+              <div className={`text-gray-300 md:text-lg text:md ${index % 2 !== 0 ? 'md:text-right' : 'text-left'} ${index % 2 === 0 ? 'md:order-2' : 'md:order-1'}${exp.link ? ' group-hover:text-gray-100 transition' : ''}`}>
+                <p>{exp.description}</p>
+              </div>
+            </CardTag>
+          );
+        })}
       </div>
     </div>
   );
