@@ -30,6 +30,19 @@ export const metadata: Metadata = {
       "Portofolio Muhammad Muhibuddin Mukhlish — proyek, pengalaman, dan sertifikasi di bidang pengembangan software.",
     type: "website",
   },
+  icons: {
+    // Browser modern membaca media query ini dan otomatis memilih varian
+    // yang kontras dengan tema tab-nya: logo hitam saat tab terang, logo
+    // putih saat tab gelap. Urutan (light lebih dulu) juga jadi fallback
+    // teraman untuk browser lama yang mengabaikan atribut media.
+    icon: [
+      { url: "/favicon-light.png", media: "(prefers-color-scheme: light)", type: "image/png" },
+      { url: "/favicon-dark.png", media: "(prefers-color-scheme: dark)", type: "image/png" },
+    ],
+    // /favicon.ico (di folder public/, bukan file konvensi khusus app/)
+    // tetap ada sebagai fallback untuk tool/bot lama yang langsung meminta
+    // /favicon.ico tanpa membaca tag <link> di HTML sama sekali.
+  },
 };
 
 export default function RootLayout({
