@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Log file percobaan login admin (jangan pernah di-commit)
+logins.log
