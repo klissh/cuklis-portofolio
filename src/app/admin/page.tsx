@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { uploadImage, supabase } from "@/utils/supabaseClient";
 import Toast from "@/components/Toast";
 import ModalForm from "@/components/ModalForm";
+import SearchBar from "@/components/admin/SearchBar";
+import Pagination from "@/components/admin/Pagination";
 
 // Type definitions
 // Project
@@ -81,6 +83,10 @@ const TABS = [
   { key: "storage", label: "Storage", icon: <FaDatabase size={22} className="mr-3" /> },
 ];
 
+// Jumlah baris per halaman untuk tabel Projects, Certificates, dan Skills
+// (di dalam tab Sections) -- dipakai bersama komponen Pagination.
+const ADMIN_PAGE_SIZE = 8;
+
 export default function AdminPage() {
   // Login state
   const [loggedIn, setLoggedIn] = useState(false);
@@ -96,6 +102,8 @@ export default function AdminPage() {
   const [projectForm, setProjectForm] = useState<Partial<Project>>({});
   const [editProjectId, setEditProjectId] = useState<number | null>(null);
   const [projectLoading, setProjectLoading] = useState(false);
+  const [projectSearch, setProjectSearch] = useState("");
+  const [projectPage, setProjectPage] = useState(1);
 
   // Experiences state
   const [experiences, setExperiences] = useState<Experience[]>([]);
@@ -119,12 +127,16 @@ export default function AdminPage() {
   const [skillForm, setSkillForm] = useState<Skill>({ name: "", logo: "" });
   const [editSkillId, setEditSkillId] = useState<number | null>(null);
   const [showSkillForm, setShowSkillForm] = useState(false);
+  const [skillSearch, setSkillSearch] = useState("");
+  const [skillPage, setSkillPage] = useState(1);
 
   // Certificates state
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [certificateForm, setCertificateForm] = useState<Partial<Certificate>>({});
   const [editCertificateId, setEditCertificateId] = useState<number | null>(null);
   const [certificateLoading, setCertificateLoading] = useState(false);
+  const [certificateSearch, setCertificateSearch] = useState("");
+  const [certificatePage, setCertificatePage] = useState(1);
 
   // Tambah state untuk file gambar
   const [projectImageFile, setProjectImageFile] = useState<File | null>(null);
@@ -764,6 +776,64 @@ export default function AdminPage() {
     }
   };
 
+  // ------------------- Search & Pagination (Projects, Certificates, Skills) -------------------
+  // Client-side saja: data lengkap sudah di-fetch semua dari Supabase ke
+  // state React, jadi filter dan pagination cukup dihitung ulang di sini
+  // setiap render tanpa perlu request tambahan ke server.
+
+  const filteredProjects = projects.filter((p) => {
+    const q = projectSearch.trim().toLowerCase();
+    if (!q) return true;
+    return p.title?.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q);
+  });
+  const projectTotalPages = Math.max(1, Math.ceil(filteredProjects.length / ADMIN_PAGE_SIZE));
+  const paginatedProjects = filteredProjects.slice(
+    (projectPage - 1) * ADMIN_PAGE_SIZE,
+    projectPage * ADMIN_PAGE_SIZE
+  );
+
+  const filteredCertificates = certificates.filter((c) => {
+    const q = certificateSearch.trim().toLowerCase();
+    if (!q) return true;
+    return c.title?.toLowerCase().includes(q);
+  });
+  const certificateTotalPages = Math.max(1, Math.ceil(filteredCertificates.length / ADMIN_PAGE_SIZE));
+  const paginatedCertificates = filteredCertificates.slice(
+    (certificatePage - 1) * ADMIN_PAGE_SIZE,
+    certificatePage * ADMIN_PAGE_SIZE
+  );
+
+  // Skill disimpan sebagai array JSON di dalam satu baris "section", bukan
+  // baris tersendiri di database -- editSkillId & handleSkillDelete merujuk
+  // ke index di skillsList ASLI (belum difilter). Supaya edit/hapus tetap
+  // menunjuk skill yang benar setelah difilter & dipaginasi, index asli
+  // disimpan berbarengan dengan datanya SEBELUM proses filter berjalan.
+  const filteredSkillEntries = skillsList
+    .map((skill, originalIndex) => ({ skill, originalIndex }))
+    .filter(({ skill }) => {
+      const q = skillSearch.trim().toLowerCase();
+      if (!q) return true;
+      return skill.name?.toLowerCase().includes(q);
+    });
+  const skillTotalPages = Math.max(1, Math.ceil(filteredSkillEntries.length / ADMIN_PAGE_SIZE));
+  const paginatedSkillEntries = filteredSkillEntries.slice(
+    (skillPage - 1) * ADMIN_PAGE_SIZE,
+    skillPage * ADMIN_PAGE_SIZE
+  );
+
+  // Jaga-jaga: kalau halaman saat ini jadi melebihi total halaman (karena
+  // data dihapus, atau hasil pencarian menyusut), mundurkan ke halaman
+  // terakhir yang masih valid supaya tidak menampilkan tabel kosong.
+  useEffect(() => {
+    if (projectPage > projectTotalPages) setProjectPage(projectTotalPages);
+  }, [projectPage, projectTotalPages]);
+  useEffect(() => {
+    if (certificatePage > certificateTotalPages) setCertificatePage(certificateTotalPages);
+  }, [certificatePage, certificateTotalPages]);
+  useEffect(() => {
+    if (skillPage > skillTotalPages) setSkillPage(skillTotalPages);
+  }, [skillPage, skillTotalPages]);
+
   // ------------------- UI -------------------
   if (!loggedIn) {
     return (
@@ -847,10 +917,22 @@ export default function AdminPage() {
                     + Tambah Project
                   </button>
                 </div>
+                <div className="mb-4">
+                  <SearchBar
+                    value={projectSearch}
+                    onChange={(v) => {
+                      setProjectSearch(v);
+                      setProjectPage(1);
+                    }}
+                    placeholder="Cari berdasarkan judul atau deskripsi..."
+                  />
+                </div>
                 {projectLoading ? (
                   <div className="py-8 text-center text-blue-700 font-semibold">Loading...</div>
-                ) : projects.length === 0 ? (
-                  <div className="py-8 text-center text-gray-400 font-semibold">Belum ada project.</div>
+                ) : filteredProjects.length === 0 ? (
+                  <div className="py-8 text-center text-gray-400 font-semibold">
+                    {projectSearch ? "Tidak ada project yang cocok dengan pencarian." : "Belum ada project."}
+                  </div>
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full text-base border border-blue-200 rounded-lg overflow-hidden">
@@ -864,7 +946,7 @@ export default function AdminPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {projects.map((p, i) => (
+                        {paginatedProjects.map((p, i) => (
                           <tr
                             key={p.id}
                             className={
@@ -921,6 +1003,12 @@ export default function AdminPage() {
                     </table>
                   </div>
                 )}
+                <Pagination
+                  currentPage={projectPage}
+                  totalItems={filteredProjects.length}
+                  pageSize={ADMIN_PAGE_SIZE}
+                  onPageChange={setProjectPage}
+                />
                 {/* Modal Form */}
                 {showProjectForm && (
                   <ModalForm
@@ -1053,10 +1141,22 @@ export default function AdminPage() {
                     + Tambah Certificate
                   </button>
                 </div>
+                <div className="mb-4">
+                  <SearchBar
+                    value={certificateSearch}
+                    onChange={(v) => {
+                      setCertificateSearch(v);
+                      setCertificatePage(1);
+                    }}
+                    placeholder="Cari berdasarkan judul..."
+                  />
+                </div>
                 {certificateLoading ? (
                   <div className="py-8 text-center text-blue-700 font-semibold">Loading...</div>
-                ) : certificates.length === 0 ? (
-                  <div className="py-8 text-center text-gray-400 font-semibold">Belum ada certificate.</div>
+                ) : filteredCertificates.length === 0 ? (
+                  <div className="py-8 text-center text-gray-400 font-semibold">
+                    {certificateSearch ? "Tidak ada certificate yang cocok dengan pencarian." : "Belum ada certificate."}
+                  </div>
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full text-base border border-blue-200 rounded-lg overflow-hidden">
@@ -1069,7 +1169,7 @@ export default function AdminPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {certificates.map((c, i) => (
+                        {paginatedCertificates.map((c, i) => (
                           <tr
                             key={c.id}
                             className={
@@ -1125,6 +1225,12 @@ export default function AdminPage() {
                     </table>
                   </div>
                 )}
+                <Pagination
+                  currentPage={certificatePage}
+                  totalItems={filteredCertificates.length}
+                  pageSize={ADMIN_PAGE_SIZE}
+                  onPageChange={setCertificatePage}
+                />
                 {/* Modal Form */}
                 {showCertificateForm && (
                   <ModalForm
@@ -1548,6 +1654,16 @@ export default function AdminPage() {
                     <span>+ Tambah Skill</span>
                   </button>
                 </div>
+                <div className="mb-4">
+                  <SearchBar
+                    value={skillSearch}
+                    onChange={(v) => {
+                      setSkillSearch(v);
+                      setSkillPage(1);
+                    }}
+                    placeholder="Cari nama skill..."
+                  />
+                </div>
                 {sectionLoading ? (
                   <div className="py-8 text-center text-blue-700 font-semibold">Loading...</div>
                 ) : (
@@ -1561,9 +1677,9 @@ export default function AdminPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {skillsList.map((skill, i) => (
+                        {paginatedSkillEntries.map(({ skill, originalIndex }, i) => (
                           <tr
-                            key={i}
+                            key={originalIndex}
                             className={
                               (i % 2 === 0 ? "bg-white" : "bg-blue-50") +
                               " border-b border-blue-200 hover:bg-blue-100 transition"
@@ -1587,7 +1703,7 @@ export default function AdminPage() {
                                   onClick={() => {
                                     setShowSkillForm(true);
                                     setSkillForm(skill);
-                                    setEditSkillId(i);
+                                    setEditSkillId(originalIndex);
                                   }}
                                   title="Edit"
                                 >
@@ -1596,7 +1712,7 @@ export default function AdminPage() {
                                 </button>
                                 <button
                                   className="flex items-center bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg font-semibold text-sm gap-1"
-                                  onClick={() => handleSkillDelete(i)}
+                                  onClick={() => handleSkillDelete(originalIndex)}
                                   title="Delete"
                                 >
                                   <MdDelete size={18} />
@@ -1606,15 +1722,23 @@ export default function AdminPage() {
                             </td>
                           </tr>
                         ))}
-                        {skillsList.length === 0 && (
+                        {filteredSkillEntries.length === 0 && (
                           <tr>
                             <td colSpan={3} className="p-6 text-center text-gray-500 italic">
-                              Belum ada skill yang ditambahkan
+                              {skillSearch
+                                ? "Tidak ada skill yang cocok dengan pencarian."
+                                : "Belum ada skill yang ditambahkan"}
                             </td>
                           </tr>
                         )}
                       </tbody>
                     </table>
+                    <Pagination
+                      currentPage={skillPage}
+                      totalItems={filteredSkillEntries.length}
+                      pageSize={ADMIN_PAGE_SIZE}
+                      onPageChange={setSkillPage}
+                    />
                   </div>
                 )}
               </div>
