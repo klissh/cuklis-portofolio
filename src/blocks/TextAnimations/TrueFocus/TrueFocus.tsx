@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 
 interface TrueFocusProps {
     sentence?: string;
-    manualMode?: boolean;
     blurAmount?: number;
     borderColor?: string;
     glowColor?: string;
@@ -20,7 +19,6 @@ interface FocusRect {
 
 const TrueFocus: React.FC<TrueFocusProps> = ({
     sentence = "True Focus",
-    manualMode = false,
     blurAmount = 5,
     borderColor = "green",
     glowColor = "rgba(0, 255, 0, 0.6)",
@@ -29,20 +27,23 @@ const TrueFocus: React.FC<TrueFocusProps> = ({
 }) => {
     const words = sentence.split(" ");
     const [currentIndex, setCurrentIndex] = useState<number>(0);
-    const [lastActiveIndex, setLastActiveIndex] = useState<number | null>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const wordRefs = useRef<(HTMLSpanElement | null)[]>([]);
     const [focusRect, setFocusRect] = useState<FocusRect>({ x: 0, y: 0, width: 0, height: 0 });
 
+    // Auto-advance ke kata berikutnya, lalu looping ke awal lagi setelah kata
+    // terakhir. Timer ini SELALU jalan (tidak lagi dimatikan oleh manualMode)
+    // dan sengaja dipasang ulang setiap kali currentIndex berubah -- baik
+    // karena timer ini sendiri maupun karena hover di bawah -- sehingga jeda
+    // berikutnya selalu dihitung penuh dari titik terakhir kata di-reveal,
+    // bukan dari jadwal lama.
     useEffect(() => {
-        if (!manualMode) {
-            const interval = setInterval(() => {
-                setCurrentIndex((prev) => (prev + 1) % words.length);
-            }, (animationDuration + pauseBetweenAnimations) * 1000);
+        const timer = setTimeout(() => {
+            setCurrentIndex((prev) => (prev + 1) % words.length);
+        }, (animationDuration + pauseBetweenAnimations) * 1000);
 
-            return () => clearInterval(interval);
-        }
-    }, [manualMode, animationDuration, pauseBetweenAnimations, words.length]);
+        return () => clearTimeout(timer);
+    }, [currentIndex, animationDuration, pauseBetweenAnimations, words.length]);
 
     useEffect(() => {
         if (currentIndex === null || currentIndex === -1) return;
@@ -59,17 +60,11 @@ const TrueFocus: React.FC<TrueFocusProps> = ({
         });
     }, [currentIndex, words.length]);
 
+    // Hover langsung mereveal kata yang di-hover. Timer auto-advance di atas
+    // otomatis melanjutkan dari titik ini ke kata sesudahnya -- tidak perlu
+    // logic terpisah untuk mouse leave.
     const handleMouseEnter = (index: number) => {
-        if (manualMode) {
-            setLastActiveIndex(index);
-            setCurrentIndex(index);
-        }
-    };
-
-    const handleMouseLeave = () => {
-        if (manualMode) {
-            setCurrentIndex(lastActiveIndex!);
-        }
+        setCurrentIndex(index);
     };
 
     return (
@@ -85,17 +80,10 @@ const TrueFocus: React.FC<TrueFocusProps> = ({
                         ref={(el) => {wordRefs.current[index] = el}}
                         className="relative lg:text-[2rem] md:text-[1.7rem] sm:text[1.2rem] xs:text[1rem]"
                         style={{
-                            filter: manualMode
-                                ? isActive
-                                    ? `blur(0px)`
-                                    : `blur(${blurAmount}px)`
-                                : isActive
-                                    ? `blur(0px)`
-                                    : `blur(${blurAmount}px)`,
+                            filter: isActive ? `blur(0px)` : `blur(${blurAmount}px)`,
                             transition: `filter ${animationDuration}s ease`,
                         } as React.CSSProperties}
                         onMouseEnter={() => handleMouseEnter(index)}
-                        onMouseLeave={handleMouseLeave}
                     >
                         {word}
                     </span>
