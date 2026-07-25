@@ -223,11 +223,10 @@ export default function Home() {
               <span className="bg-transparent text-cyan-100 px-4 py-2 rounded-full text-base xs:text-lg sm:text-xl font-bold shadow w-fit mx-auto block text-center break-words">
                 <TrueFocus
                   sentence={titles.map((t: string) => t.replaceAll(' ', '\u00A0')).join(' ')}
-                  manualMode={true}
                   blurAmount={5}
                   borderColor="cyan"
                   animationDuration={0.3}
-                  pauseBetweenAnimations={1}
+                  pauseBetweenAnimations={2.7}
                 />
               </span>
             )}
