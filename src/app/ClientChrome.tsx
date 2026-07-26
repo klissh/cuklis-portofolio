@@ -48,6 +48,22 @@ export default function ClientChrome({
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      // Browser (terutama saat reload/kembali dari halaman lain) secara
+      // default mencoba memulihkan posisi scroll terakhir sebelum halaman
+      // di-refresh (history.scrollRestoration bawaan = 'auto'). Ini yang
+      // membuat halaman terlihat "start" agak ke bawah (dekat section
+      // About/Tech Stack) alih-alih benar-benar di paling atas saat baru
+      // dibuka -- terutama kentara di mobile karena viewport lebih pendek.
+      // Matikan restorasi otomatis itu, lalu pastikan mulai dari paling atas
+      // -- KECUALI memang ada hash (mis. "#projects") di URL yang sengaja
+      // dituju sebagai deep link ke section tertentu, supaya itu tetap jalan.
+      if ('scrollRestoration' in window.history) {
+        window.history.scrollRestoration = 'manual';
+      }
+      if (!window.location.hash) {
+        window.scrollTo(0, 0);
+      }
+
       lenis.current = new Lenis({
         duration: 1.2,
         easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
