@@ -911,7 +911,7 @@ export default function AdminPage() {
         </select>
       </aside>
       {/* Main Content */}
-      <main className="flex-1 md:ml-64 pt-20 md:pt-10 px-2 md:px-10 pb-10 min-h-screen bg-gradient-to-br from-gray-100 to-blue-50">
+      <main className="flex-1 min-w-0 md:ml-64 pt-20 md:pt-10 px-2 md:px-10 pb-10 min-h-screen bg-gradient-to-br from-gray-100 to-blue-50">
         <div className="w-full max-w-5xl mx-auto">
           {/* Section Title */}
           <h2 className="text-3xl font-extrabold text-blue-900 mb-8 border-b-4 border-cyan-400 pb-2 tracking-wide flex items-center gap-3">
