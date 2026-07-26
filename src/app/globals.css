@@ -4,6 +4,19 @@
 @import "tailwindcss";
 
 /*
+  Tailwind v4 tidak lagi membaca tailwind.config.js secara otomatis untuk
+  extend.screens (butuh directive @config eksplisit yang tidak dipakai di
+  project ini). Akibatnya semua class "xs:" yang sudah ditulis di beberapa
+  komponen (mis. hero title pill, TrueFocus) tidak pernah aktif karena
+  breakpoint "xs" tidak terdaftar. Breakpoint tambahan di bawah sm (640px)
+  ini didaftarkan lewat @theme (cara resmi Tailwind v4) tanpa mengubah
+  breakpoint bawaan (sm/md/lg/xl/2xl) yang sudah ada.
+*/
+@theme {
+  --breakpoint-xs: 30rem; /* 480px */
+}
+
+/*
   Removed the @media (prefers-color-scheme: dark) block.
   Set the dark mode colors as the default in :root.
 */
