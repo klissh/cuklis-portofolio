@@ -13,7 +13,7 @@ const Toast: React.FC<ToastProps> = ({ message, type = "success", onClose }) => 
   }, [onClose]);
 
   return (
-    <div className={`fixed top-6 right-6 z-50 px-6 py-3 rounded-lg shadow-lg text-white font-semibold transition
+    <div className={`fixed top-20 md:top-6 right-4 md:right-6 z-50 max-w-[calc(100vw-2rem)] md:max-w-sm px-6 py-3 rounded-lg shadow-lg text-white font-semibold transition
       ${type === "success" ? "bg-green-600" : "bg-red-600"}`}>
       {message}
     </div>

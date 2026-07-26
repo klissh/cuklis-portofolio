@@ -8,8 +8,8 @@ interface ModalFormProps {
 }
 
 const ModalForm: React.FC<ModalFormProps> = ({ title, children, onClose }) => (
-  <div className="fixed inset-0 z-40 flex items-center justify-center bg-black bg-opacity-40">
-    <div className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-lg relative">
+  <div className="fixed inset-0 z-40 flex items-center justify-center bg-black bg-opacity-40 p-4">
+    <div className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto relative">
       <button
         className="absolute top-3 right-3 text-gray-500 hover:text-red-500 text-2xl font-bold"
         onClick={onClose}
