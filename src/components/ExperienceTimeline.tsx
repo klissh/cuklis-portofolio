@@ -101,43 +101,66 @@ const ExperienceTimeline: React.FC = () => {
             </>
           );
 
-          // Seluruh kartu (kolom title/logo MAUPUN kolom deskripsi) dibungkus
-          // satu link yang sama ketika exp.link tersedia -- sebelumnya hanya
-          // kolom title/logo yang bisa diklik, kolom deskripsi tidak pernah
-          // ikut jadi bagian link sama sekali.
-          const CardTag = exp.link ? 'a' : 'div';
-          const cardLinkProps = exp.link
-            ? {
-                href: exp.link,
-                target: '_blank',
-                rel: 'noopener noreferrer',
-                style: { textDecoration: 'none', color: 'inherit' } as React.CSSProperties,
-              }
-            : {};
-
+          // Kolom title/logo (Side 1) dan kolom deskripsi (Side 2) MASING-MASING
+          // dibungkus <a> sendiri (bukan satu <a> yang membungkus seluruh
+          // kartu) ketika exp.link tersedia. Wrapper terluar tetap <div> biasa
+          // persis seperti semula -- penyatuan jadi satu <a> di percobaan
+          // sebelumnya mengubah elemen dasar kartu dan membuat garis timeline
+          // (absolute, di belakang kartu) tampil terputus-putus secara tidak
+          // konsisten. Dengan tetap memisahkan keduanya seperti awal, kolom
+          // deskripsi tetap ikut bisa diklik tanpa mengubah struktur kartu.
           return (
-            <CardTag
+            <div
               key={exp.id}
-              {...cardLinkProps}
-              className={`relative grid grid-cols-1 md:grid-cols-2 items-start gap-x-20 bg-black rounded-2xl p-6 shadow-lg md:bg-transparent${
-                exp.link ? ' group cursor-pointer transition-colors duration-300 hover:bg-white/5 md:hover:bg-transparent' : ''
-              }`}
+              className="relative grid grid-cols-1 md:grid-cols-2 items-start gap-x-20 bg-black rounded-2xl p-6 shadow-lg md:bg-transparent"
             >
               {/* Side 1: Title, Company, Year, Logo - Conditional Alignment */}
-              <div className={`flex flex-col ${index % 2 === 0 ? 'md:items-end md:text-right' : 'md:items-start md:text-left'} ${index % 2 === 0 ? 'md:order-1' : 'md:order-2'}`}>
-                <h3 className={`md:text-2xl text-xl font-bold text-gray-100${exp.link ? ' group-hover:text-cyan-200 transition' : ''}`}>{exp.title}</h3>
-                {exp.company && (
-                  <span className={`text-lg text-cyan-400 mb-1 block${exp.link ? ' group-hover:text-cyan-300 transition' : ''}`}>{exp.company}</span>
-                )}
-                {dateRange}
-                {logoAndImage}
-              </div>
+              {exp.link ? (
+                <a
+                  href={exp.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`flex flex-col ${index % 2 === 0 ? 'md:items-end md:text-right' : 'md:items-start md:text-left'} ${index % 2 === 0 ? 'md:order-1' : 'md:order-2'} group cursor-pointer`}
+                  style={{ textDecoration: 'none', color: 'inherit' }}
+                >
+                  <h3 className="md:text-2xl text-xl font-bold text-gray-100 group-hover:text-cyan-200 transition">{exp.title}</h3>
+                  {exp.company && (
+                    <span className="text-lg text-cyan-400 mb-1 block group-hover:text-cyan-300 transition">{exp.company}</span>
+                  )}
+                  {dateRange}
+                  {logoAndImage}
+                </a>
+              ) : (
+                <div className={`flex flex-col ${index % 2 === 0 ? 'md:items-end md:text-right' : 'md:items-start md:text-left'} ${index % 2 === 0 ? 'md:order-1' : 'md:order-2'}`}>
+                  <h3 className="md:text-2xl text-xl font-bold text-gray-100">{exp.title}</h3>
+                  {exp.company && (
+                    <span className="text-lg text-cyan-400 mb-1 block">{exp.company}</span>
+                  )}
+                  {dateRange}
+                  {logoAndImage}
+                </div>
+              )}
 
-              {/* Side 2: Description - Conditional Alignment */}
-              <div className={`text-gray-300 md:text-lg text:md ${index % 2 !== 0 ? 'md:text-right' : 'text-left'} ${index % 2 === 0 ? 'md:order-2' : 'md:order-1'}${exp.link ? ' group-hover:text-gray-100 transition' : ''}`}>
-                <p>{exp.description}</p>
-              </div>
-            </CardTag>
+              {/* Side 2: Description - Conditional Alignment. Dulu SELALU <div>
+                  biasa (tidak pernah ikut jadi link) walau exp.link ada -- ini
+                  akar masalah yang diminta diperbaiki: sekarang ikut dibungkus
+                  <a> sendiri, terpisah dari Side 1, saat exp.link tersedia. */}
+              {exp.link ? (
+                <a
+                  href={exp.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`block text-gray-300 md:text-lg text:md ${index % 2 !== 0 ? 'md:text-right' : 'text-left'} ${index % 2 === 0 ? 'md:order-2' : 'md:order-1'} group cursor-pointer hover:text-gray-100 transition`}
+                  style={{ textDecoration: 'none' }}
+                >
+                  <p>{exp.description}</p>
+                </a>
+              ) : (
+                <div className={`text-gray-300 md:text-lg text:md ${index % 2 !== 0 ? 'md:text-right' : 'text-left'} ${index % 2 === 0 ? 'md:order-2' : 'md:order-1'}`}>
+                  <p>{exp.description}</p>
+                </div>
+              )}
+            </div>
           );
         })}
       </div>
