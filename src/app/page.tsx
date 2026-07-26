@@ -333,7 +333,7 @@ export default function Home() {
               {/* Container untuk grid dan blur effect */}
                <div className="relative overflow-hidden w-fit flex justify-center mx-auto">
                 {/* Grid untuk skills dengan logo - responsif untuk mobile, desktop tetap 4 kolom */}
-                <div className="grid grid-cols-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-3 lg:gap-3 xl:gap-3 w-fit">
+                <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-3 lg:gap-3 xl:gap-3 w-fit">
                    {/* Menampilkan skills dari createSection */}
                    {(skillsFromCreate.length > 0 ? skillsFromCreate : Array.from({ length: 20 }, (_, i) => ({ name: 'PHP', logo: '/techstack/php.svg' }))).map((skill: any, index: number) => {
                       // Hitung posisi baris (mulai dari 0)
@@ -486,7 +486,7 @@ export default function Home() {
         </div>
 
         {/* Projects Section Start */}
-        <div className="w-full max-w-[1400px] mx-auto">
+        <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-3 w-full mt-4 md:mt-10 gap-2 md:gap-4 pb-4">
             {loading ? (
               <div className="col-span-3 text-center">Loading...</div>
@@ -577,7 +577,7 @@ export default function Home() {
         </div>
 
         {/* Certificates Section Start */}
-        <div className="w-full max-w-[1400px] mx-auto">
+        <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-3 w-full mt-4 md:mt-10 gap-2 md:gap-4 pb-4">
             {loading ? (
               <div className="col-span-3 text-center">Loading...</div>

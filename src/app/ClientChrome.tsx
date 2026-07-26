@@ -183,7 +183,7 @@ export default function ClientChrome({
 
       {/* Mobile menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-transparent backdrop-blur-[10px] pt-10 fixed top-[72px] sm:top-[80px] md:top-[96px] right-0 left-0 z-40 p-4 sm:p-5 overflow-y-auto h-[calc(100vh - 72px)] sm:h-[calc(100vh - 80px)] md:h-[calc(100vh - 96px)]">
+        <div className="md:hidden bg-transparent backdrop-blur-[10px] pt-10 fixed top-[72px] sm:top-[80px] md:top-[96px] right-0 left-0 z-40 p-4 sm:p-5 overflow-y-auto h-[calc(100vh_-_72px)] sm:h-[calc(100vh_-_80px)] md:h-[calc(100vh_-_96px)]">
           <nav className="flex flex-col space-y-4">
             {items.map((item, index) => (
               <Link

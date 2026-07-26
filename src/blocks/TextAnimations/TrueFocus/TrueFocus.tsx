@@ -78,7 +78,7 @@ const TrueFocus: React.FC<TrueFocusProps> = ({
                     <span
                         key={index}
                         ref={(el) => {wordRefs.current[index] = el}}
-                        className="relative lg:text-[2rem] md:text-[1.7rem] sm:text[1.2rem] xs:text[1rem]"
+                        className="relative lg:text-[2rem] md:text-[1.7rem] sm:text-[1.2rem] xs:text-[1rem]"
                         style={{
                             filter: isActive ? `blur(0px)` : `blur(${blurAmount}px)`,
                             transition: `filter ${animationDuration}s ease`,

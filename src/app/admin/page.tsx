@@ -857,7 +857,7 @@ export default function AdminPage() {
   // ------------------- UI -------------------
   if (!loggedIn) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 to-blue-600">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 to-blue-600 p-4">
         <div className="max-w-sm w-full p-8 bg-white rounded-2xl shadow-2xl border border-blue-300">
           <h2 className="text-3xl font-bold mb-8 text-center text-blue-800 tracking-wide">Admin Login</h2>
           <form onSubmit={handleLogin} className="flex flex-col gap-5">
@@ -922,7 +922,7 @@ export default function AdminPage() {
           {tab === "projects" && (
             <section>
               <div className="bg-white rounded-2xl shadow-xl p-6 border border-blue-200">
-                <div className="flex justify-between items-center mb-4">
+                <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
                   <h3 className="font-bold text-blue-800 text-lg">Daftar Project</h3>
                   <button
                     className="bg-green-600 hover:bg-green-700 text-white px-5 py-3 rounded-lg font-bold flex items-center gap-2"
@@ -1146,7 +1146,7 @@ export default function AdminPage() {
           {tab === "certificates" && (
             <section>
               <div className="bg-white rounded-2xl shadow-xl p-6 border border-blue-200">
-                <div className="flex justify-between items-center mb-4">
+                <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
                   <h3 className="font-bold text-blue-800 text-lg">Daftar Certificate</h3>
                   <button
                     className="bg-green-600 hover:bg-green-700 text-white px-5 py-3 rounded-lg font-bold flex items-center gap-2"
@@ -1327,7 +1327,7 @@ export default function AdminPage() {
           {tab === "experiences" && (
             <section>
               <div className="bg-white rounded-2xl shadow-xl p-6 border border-blue-200">
-                <div className="flex justify-between items-center mb-4">
+                <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
                   <h3 className="font-bold text-blue-800 text-lg">Daftar Experience</h3>
                   <button
                     className="bg-green-600 hover:bg-green-700 text-white px-5 py-3 rounded-lg font-bold flex items-center gap-2"
@@ -1692,7 +1692,7 @@ export default function AdminPage() {
             <section>
               {/* Skill dan Tools Section */}
               <div className="bg-white rounded-2xl shadow-2xl p-8 mb-10 border border-blue-200">
-                <div className="flex justify-between items-center mb-4">
+                <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
                   <h3 className="font-bold text-blue-800 text-lg">Skill dan Tools saya</h3>
                   <button
                     className="flex items-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm gap-1"
@@ -1870,7 +1870,7 @@ export default function AdminPage() {
           {/* Storage Tab */}
           {tab === "storage" && (
             <section className="bg-white rounded-xl shadow-lg p-8 border border-blue-200">
-              <div className="flex justify-between items-center mb-6">
+              <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
                 <h3 className="font-bold text-blue-800 text-xl">Storage Management</h3>
                 <div className="text-sm text-gray-600">
                   Kelola file-file yang tersimpan di Supabase Storage
@@ -1967,7 +1967,7 @@ export default function AdminPage() {
           />
         )}
         {showDeleteExpModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4">
             <div className="bg-white rounded-xl shadow-lg p-8 max-w-sm w-full flex flex-col items-center">
               <h3 className="text-xl font-bold mb-4 text-blue-900">Konfirmasi Hapus</h3>
               <p className="mb-6 text-gray-700 text-center">Yakin ingin menghapus experience ini?</p>
@@ -1979,7 +1979,7 @@ export default function AdminPage() {
           </div>
         )}
         {showDeleteProjectModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4">
             <div className="bg-white rounded-xl shadow-lg p-8 max-w-sm w-full flex flex-col items-center">
               <h3 className="text-xl font-bold mb-4 text-blue-900">Konfirmasi Hapus</h3>
               <p className="mb-6 text-gray-700 text-center">Yakin ingin menghapus project ini?</p>
@@ -1991,7 +1991,7 @@ export default function AdminPage() {
           </div>
         )}
         {showDeleteCertificateModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4">
             <div className="bg-white rounded-xl shadow-lg p-8 max-w-sm w-full flex flex-col items-center">
               <h3 className="text-xl font-bold mb-4 text-blue-900">Konfirmasi Hapus</h3>
               <p className="mb-6 text-gray-700 text-center">Yakin ingin menghapus certificate ini?</p>
